@@ -238,4 +238,32 @@ router.post("/guardarSolicitudEpp", (req, res) => {
 
 });
 
+
+router.post('/getListaSolicitudes',(req,res)=>{
+
+  const {fechadesde, fechahasta} = req.body.values;
+
+  const fds = moment(fechadesde).format('YYYY-MM-DD');
+  const fhs = moment(fechahasta).format('YYYY-MM-DD');
+        
+  const sql =`SELECT 
+  sol.id,
+  sol.rut_solicitante,
+  dcc.Nombre AS nomsolicita,
+  sol.fec_solicitud,
+  IF(sol.obs = '', 'Sin observaciones', sol.obs) AS obs,
+  sol.cor_solicitante,
+  IF(sol.fon_solicitante = '', 'No informado', sol.fon_solicitante) AS fon_solicitante
+  FROM epp_solicitud sol
+  LEFT JOIN tofitobd.DotacionCC dcc
+  ON sol.rut_solicitante = dcc.Rut
+  WHERE DATE(sol.fec_solicitud) BETWEEN ? AND ?
+  `
+  conector.query(sql, [fds, fhs], (err,result)=>{
+  if(err) throw err
+    res.status(200).json(result)
+  })
+
+})
+
 module.exports = router;
