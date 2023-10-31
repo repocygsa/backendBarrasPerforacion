@@ -14,7 +14,7 @@ router.post('/getPermisoSessionEpp',(req,res)=>{
     
   const {rut, ctto} = req.body.res.data;
   const sql = `SELECT * FROM epp_usuarios WHERE rut = ? `
-console.log(req.body)
+
   conector.query(sql,[rut],(err, result)=>{
 
     if(err) throw err   
@@ -297,9 +297,9 @@ const fId = id !=='0'?`AND fk_solicitud =${id}`:''
     gobm.epp_solicitud.fec_solicitud,
     gobm.epp_solicitud.obs,
     gobm.epp_solicitud_detalle.can_reservada,
-    tofitobd.dotacioncc.Nombres,
-    tofitobd.dotacioncc.ApellidoPaterno,
-    tofitobd.dotacioncc.ApellidoMaterno,
+    tofitobd.DotacionCC.Nombres,
+    tofitobd.DotacionCC.ApellidoPaterno,
+    tofitobd.DotacionCC.ApellidoMaterno,
     (
       COALESCE(
           (
@@ -324,7 +324,7 @@ FROM
 	INNER JOIN gobm.epp_talla ON epp_solicitud_detalle.fk_talla = epp_talla.id
 	INNER JOIN gobm.epp_equipo ON epp_solicitud_detalle.des_epp = epp_equipo.id
 	INNER JOIN gobm.epp_solicitud ON epp_solicitud_detalle.fk_solicitud = epp_solicitud.id
-	INNER JOIN tofitobd.dotacioncc ON gobm.epp_solicitud.rut_solicitante = tofitobd.dotacioncc.Rut
+	INNER JOIN tofitobd.DotacionCC ON gobm.epp_solicitud.rut_solicitante = tofitobd.DotacionCC.Rut
 WHERE est_solicitud > 0
 ${fId}
   `
@@ -469,16 +469,16 @@ router.post('/getEppAllDetalle',(req,res)=>{
 	gobm.epp_ccta_stock.mov_epp_fecha,
 	gobm.epp_ccta_stock.id_comp,
 	gobm.epp_ccta_stock.rut_resp,
-	tofitobd.dotacioncc.Nombres,
-	tofitobd.dotacioncc.ApellidoPaterno,
-	tofitobd.dotacioncc.ApellidoMaterno 
+	tofitobd.DotacionCC.Nombres,
+	tofitobd.DotacionCC.ApellidoPaterno,
+	tofitobd.DotacionCC.ApellidoMaterno 
 FROM
 	gobm.epp_ccta_stock
 	INNER JOIN gobm.epp_equipo ON epp_ccta_stock.fk_id_epp = epp_equipo.id
 	INNER JOIN gobm.epp_talla ON epp_ccta_stock.fk_id_talla = epp_talla.id
 	INNER JOIN gobm.epp_sexo ON epp_ccta_stock.fk_id_sexo = epp_sexo.id
 	INNER JOIN gobm.epp_tipo_mov ON epp_ccta_stock.fk_id_mov = epp_tipo_mov.id
-	INNER JOIN tofitobd.dotacioncc ON gobm.epp_ccta_stock.rut_resp = tofitobd.dotacioncc.Rut
+	INNER JOIN tofitobd.DotacionCC ON gobm.epp_ccta_stock.rut_resp = tofitobd.DotacionCC.Rut
 WHERE 
 epp_ccta_stock.id > 0
 ${fepp}
