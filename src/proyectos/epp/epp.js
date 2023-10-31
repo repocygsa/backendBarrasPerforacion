@@ -14,7 +14,7 @@ router.post('/getPermisoSessionEpp',(req,res)=>{
     
   const {rut, ctto} = req.body.res.data;
   const sql = `SELECT * FROM epp_usuarios WHERE rut = ? `
-
+console.log(req.body)
   conector.query(sql,[rut],(err, result)=>{
 
     if(err) throw err   
