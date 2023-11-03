@@ -553,8 +553,8 @@ router.post("/insertStock", async (req, res) => {
   const status = 3;
 
   const sql = "INSERT INTO epp_ccta_stock SET ?";
-  const epp = req.body.data;
-  const dataArray = req.body.data.solicitud;
+  const epp = req.body.data.dataSolicitud;
+  const dataArray = req.body.data.dataSolicitud.solicitud;
 
   try {
     const result=''
@@ -568,7 +568,7 @@ router.post("/insertStock", async (req, res) => {
         mov_epp_cant: data.canEpp,
         mov_epp_fecha: fecha,
         fk_id_mov: 1,
-        rut_resp: '17.526.007-2',
+        rut_resp: req.body.data.usuario,
         id_comp: compuesto
       };
 
@@ -602,7 +602,7 @@ const Nombre = form.nomUser
 const rut = form.user
 const correo = form.correo
 const statusObs = tipo ===2?'Su solicitud ha sido aprobada. Por favor, diríjase a retirar los elementos en la fecha, hora y lugar programado.':'Los EPP han sido entregados, por lo tanto, su solicitud ha sido finalizada.'
-  const sql2 = `UPDATE epp_solicitud set status_solicitud = ${form.tipo},  fec_hora_entrega ='${moment(form.ftur_ultima_actividad).format('DD-MM-YYYY HH:mm')}',  lugar_entrega_solicitud = '${lugar}', obs_solicitud='${obs}' where id =${insertId} `;
+  const sql2 = `UPDATE epp_solicitud set status_solicitud = ${form.tipo},  fec_hora_entrega ='${moment(form.ftur_ultima_actividad).format('YYYY-MM-DD HH:mm')}',  lugar_entrega_solicitud = '${lugar}', obs_solicitud='${obs}' where id =${insertId} `;
   
   const tableRows = dataArray.map(dataItem => {
     return `
@@ -840,7 +840,7 @@ router.post("/insertReserva", async (req, res) => {
   const epp = req.body.data;
   const dataArray = req.body.data.DataEppAll.data;
   const insertId=req.body.data.DataEppAll.data[0].fk_solicitud
-// console.log(epp, 'status')
+
 
   try {
     const result=''
@@ -855,7 +855,7 @@ router.post("/insertReserva", async (req, res) => {
         mov_epp_cant: data.can_reservada,
         mov_epp_fecha: fecha,
         fk_id_mov: req.body.data.values.form.tipo,
-        rut_resp: '17.526.007-2',
+        rut_resp: data.rut_solicitante,
         id_comp: compuesto
 
       };
