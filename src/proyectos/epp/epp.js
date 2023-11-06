@@ -480,7 +480,8 @@ FROM
 	INNER JOIN gobm.epp_tipo_mov ON epp_ccta_stock.fk_id_mov = epp_tipo_mov.id
 	INNER JOIN tofitobd.DotacionCC ON gobm.epp_ccta_stock.rut_resp = tofitobd.DotacionCC.Rut
 WHERE 
-epp_ccta_stock.id > 0
+gobm.epp_ccta_stock.fk_id_mov <=2
+
 ${fepp}
 
   `;
