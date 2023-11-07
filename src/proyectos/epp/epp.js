@@ -550,7 +550,7 @@ dataArray.map((data) => {
 }); */
 
 router.post("/insertStock", async (req, res) => {
-  const fecha = moment().format('YYYY-MM-DD hh:mm');
+  const fecha = moment().format('YYYY-MM-DD HH:mm');
   const status = 3;
 
   const sql = "INSERT INTO epp_ccta_stock SET ?";
@@ -714,7 +714,7 @@ const statusObs = tipo ===2?'Su solicitud ha sido aprobada. Por favor, diríjase
 
              <tr>
              <td style="padding-left: 20px; padding-right: 20px;" align="center" valign="top" class="mainTitle">
-               <h2 class="text" style="color:#000;font-family:Poppins,Helvetica,Arial,sans-serif;font-size:14px;font-weight:500;font-style:normal;letter-spacing:normal;line-height:36px;text-transform:none;text-align:left;padding:0;margin:0"><b>Número de Solicitud: </b> ${insertId}</h2>
+               <h2 class="text" style="color:#000;font-family:Poppins,Helvetica,Arial,sans-serif;font-size:14px;font-weight:500;font-style:normal;letter-spacing:normal;line-height:36px;text-transform:none;text-align:left;padding:0;margin:0"><b>Número de solicitud: </b> ${insertId}</h2>
              </td>
            </tr>
 
@@ -814,6 +814,13 @@ const statusObs = tipo ===2?'Su solicitud ha sido aprobada. Por favor, diríjase
      <tr>
        <td style="font-size:1px;line-height:1px" height="30">&nbsp;</td>
      </tr>
+     <tr>
+     <td align="center" valign="top" class="imgHero">
+       
+       <img alt="" border="0" src="cid:logo_codelco" width="100" height="auto" style="display:block;color: #f9f9f9;">
+
+     </td>
+   </tr>
    </tbody>
  </table>
 </td>
@@ -834,7 +841,7 @@ const statusObs = tipo ===2?'Su solicitud ha sido aprobada. Por favor, diríjase
 }
 
 router.post("/insertReserva", async (req, res) => {
-  const fecha = moment().format('YYYY-MM-DD hh:mm');
+  const fecha = moment().format('YYYY-MM-DD HH:mm');
   const status = 3;
   const form =req.body.data.values.form
   const sql = "INSERT INTO epp_ccta_stock SET ?";
@@ -881,7 +888,7 @@ router.post("/insertReserva", async (req, res) => {
 });
 
 router.post("/rechazaSolicitud", async (req, res) => {
-  const fecha = moment().format('YYYY-MM-DD hh:mm');
+  const fecha = moment().format('YYYY-MM-DD HH:mm');
   const status = 3;
   const form =req.body.data.values.form
   const sql = "INSERT INTO epp_ccta_stock SET ?";
@@ -1081,6 +1088,13 @@ ${tableRows.join('')}
      <tr>
        <td style="font-size:1px;line-height:1px" height="30">&nbsp;</td>
      </tr>
+     <tr>
+     <td align="center" valign="top" class="imgHero">
+       
+       <img alt="" border="0" src="cid:logo_codelco" width="100" height="auto" style="display:block;color: #f9f9f9;">
+
+     </td>
+   </tr>
    </tbody>
  </table>
 </td>
