@@ -599,7 +599,7 @@ router.post('/getCantidadId',(req,res)=>{
   
  
   sql = `
-  SELECT id AS nId
+  SELECT id AS numero_id
   FROM inc_registro
   ORDER BY id DESC
   LIMIT 1;
