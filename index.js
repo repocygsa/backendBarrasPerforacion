@@ -17,7 +17,7 @@ new socket()
 //Socket
 
 // Llamado Epp
-const epp = require('./src/proyectos/epp/epp')
+const epp = require('./src/proyectos/aprendizaje/aprendizaje')
 
 const port = 8030;
 app.listen(port, () => {
@@ -29,6 +29,6 @@ const whiteList = ['http://appsgobm.com','http://localhost:3000'];
 app.use(cors({origin:"*"}));
 
 //epp
-app.use('/epp',epp);
+app.use('/aprendizaje',epp);
 
 
