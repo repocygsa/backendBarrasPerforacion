@@ -599,8 +599,10 @@ router.post('/getCantidadId',(req,res)=>{
   
  
   sql = `
-  SELECT COUNT(id) AS numero_id 
-  FROM inc_registro 
+  SELECT id
+  FROM inc_registro
+  ORDER BY id DESC
+  LIMIT 1;
   `
   conector.query(sql, (error,result)=>{
   if(error) throw error;        
