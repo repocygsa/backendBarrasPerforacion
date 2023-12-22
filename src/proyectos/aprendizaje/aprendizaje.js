@@ -948,7 +948,7 @@ button:hover {
   
   conector.query(sql2,(err2,result2)=>{
     if(err2) throw err2
-    newMailer.enviarCorreo('randr014@contratistas.codelco.cl',`Aprendizaje de incidente GOM ` ,`${body}`,attachments)
+    newMailer.enviarCorreo('randr014@contratistas.codelco.cl, randradeva@jej.cl',`Aprendizaje de incidente GOM ` ,`${body}`,attachments)
 
   });
 
