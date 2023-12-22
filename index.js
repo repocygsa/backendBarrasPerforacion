@@ -19,7 +19,7 @@ new socket()
 // Llamado Epp
 const epp = require('./src/proyectos/aprendizaje/aprendizaje')
 
-const port = 8030;
+const port = 8060;
 app.listen(port, () => {
   console.log(`Servidor corriendo en puerto: ${port}`);
 });
