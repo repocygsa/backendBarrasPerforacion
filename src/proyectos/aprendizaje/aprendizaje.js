@@ -616,7 +616,7 @@ router.post('/getCantidadId',(req,res)=>{
  const envioFlashSeguridad=(insertId, valores, accCorrectivaConcatenada,tipoIncidenteDesc, empresa, fileImg, calificaIncidenteDesc)=>{
   
   const incidenteFolder = `Incidente_${valores.ctt_inf}`;
-  const imgPath = `${pathDocument}/${incidenteFolder}/img_${valores.pos_inf}/${fileImg}`;
+  const imgPath = `${pathDocument}/${incidenteFolder}/img_${valores.pos_inf}_folio-${insertId}/${fileImg}`;
 
   const attachments = [
     {
