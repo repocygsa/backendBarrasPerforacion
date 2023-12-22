@@ -205,13 +205,13 @@ router.post("/getIncidentesDet", (req, res) => {
 	gobm.inc_registro_detalle.fk_id_incidente, 
   gobm.inc_registro_detalle.inc_obs, 
   DATEDIFF(NOW(), gobm.inc_registro_detalle.inc_det_fecha_cierre) AS dias_diferencia,
-	tofitobd.dotacioncc.Nombre
+	tofitobd.DotacionCC.Nombre
 FROM
 	gobm.inc_registro_detalle
 	INNER JOIN
-	tofitobd.dotacioncc
+	tofitobd.DotacionCC
 	ON 
-		gobm.inc_registro_detalle.inc_rut_responsable = tofitobd.dotacioncc.Rut
+		gobm.inc_registro_detalle.inc_rut_responsable = tofitobd.DotacionCC.Rut
   where id > 0
     ${condicion}
   `;
@@ -324,7 +324,7 @@ router.post("/getIncidentes", (req, res) => {
       gobm.inc_registro.inc_crea,
       gobm.inc_registro.inc_fecha_hora_registro,
       gobm.inc_registro.inc_estado,
-      tofitobd.dotacioncc.Nombre AS lider,
+      tofitobd.DotacionCC.Nombre AS lider,
       gobm.inc_registro.inc_ruta_archivo,
       gobm.inc_registro.inc_fecha_carga,
       gobm.inc_registro.inc_ruta_obs,
@@ -368,7 +368,7 @@ router.post("/getIncidentes", (req, res) => {
       INNER JOIN gobm.hal_seg_subact2 ON gobm.inc_registro.fk_actividad_2 = gobm.hal_seg_subact2.id
       LEFT JOIN gobm.hal_seg_subact3 ON gobm.inc_registro.fk_actividad_3 = gobm.hal_seg_subact3.id
       LEFT JOIN gobm.hal_seg_subact4 ON gobm.inc_registro.fk_actividad_4 = gobm.hal_seg_subact4.id
-      LEFT JOIN tofitobd.dotacioncc ON gobm.inc_registro.inc_rut_lider = tofitobd.dotacioncc.Rut
+      LEFT JOIN tofitobd.DotacionCC ON gobm.inc_registro.inc_rut_lider = tofitobd.DotacionCC.Rut
       LEFT JOIN inc_calificacion_incidente ON inc_registro.fk_cal_incidente = inc_calificacion_incidente.id
 	LEFT JOIN inc_tipo_incidente ON inc_registro.fk_tip_incidente = inc_tipo_incidente.id
   WHERE gobm.inc_registro.id >= 0
@@ -452,16 +452,16 @@ router.post("/getEmpresa", (req, res) => {
   
     sql = `
     SELECT
-    dotacioncc.Empresa, 
-    dotacioncc.Contrato, 
-    dotacioncc.Gerencia, 
-    CONCAT(dotacioncc.Empresa, ' - ', dotacioncc.Contrato) AS resultConcat
+    DotacionCC.Empresa, 
+    DotacionCC.Contrato, 
+    DotacionCC.Gerencia, 
+    CONCAT(DotacionCC.Empresa, ' - ', DotacionCC.Contrato) AS resultConcat
   FROM
-    dotacioncc
+    DotacionCC
   WHERE
-    dotacioncc.Gerencia ='GOBM'
+    DotacionCC.Gerencia ='GOBM'
   GROUP BY
-    dotacioncc.Contrato
+    DotacionCC.Contrato
   ORDER BY
     resultConcat ASC
     
