@@ -452,16 +452,16 @@ router.post("/getEmpresa", (req, res) => {
   
     sql = `
     SELECT
-    DotacionCC.Empresa, 
-    DotacionCC.Contrato, 
-    DotacionCC.Gerencia, 
-    CONCAT(DotacionCC.Empresa, ' - ', DotacionCC.Contrato) AS resultConcat
+    tofitobd.DotacionCC.Empresa, 
+    tofitobd.DotacionCC.Contrato, 
+    tofitobd.DotacionCC.Gerencia, 
+    CONCAT(tofitobd.DotacionCC.Empresa, ' - ', tofitobd.DotacionCC.Contrato) AS resultConcat
   FROM
-    DotacionCC
+  tofitobd.DotacionCC
   WHERE
-    DotacionCC.Gerencia ='GOBM'
+  tofitobd.DotacionCC.Gerencia ='GOBM'
   GROUP BY
-    DotacionCC.Contrato
+  tofitobd.DotacionCC.Contrato
   ORDER BY
     resultConcat ASC
     
