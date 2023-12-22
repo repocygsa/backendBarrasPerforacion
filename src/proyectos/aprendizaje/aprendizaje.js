@@ -565,11 +565,27 @@ router.post('/getJerarquia',(req,res)=>{
 router.post('/getRiesgoCritico',(req,res)=>{
 
   sql = `
+  
   SELECT
-  hal_seg_rc.*,
-  CONCAT( hal_seg_rc.cod_sigo, ' - ', hal_seg_rc.nom) AS resultConcat
+  0 AS id,
+  NULL AS cod_sigo,
+  NULL AS nom,
+  'No aplica' AS resultConcat
+
+UNION
+
+SELECT
+  id,
+  cod_sigo,
+  nom,
+  CONCAT(cod_sigo, ' - ', nom) AS resultConcat
 FROM
-  hal_seg_rc
+  hal_seg_rc;
+
+
+
+
+
   `;
   conector.query(sql, (error,result)=>{
       if(error) throw error;        
