@@ -948,7 +948,7 @@ button:hover {
   
   conector.query(sql2,(err2,result2)=>{
     if(err2) throw err2
-    newMailer.enviarCorreo('randr014@contratistas.codelco.cl, randradeva@jej.cl, gcano001@codelco.cl, fleiv004@contratistas.codelco.cl, gtorr011@contratistas.codelco.cl',`Aprendizaje de incidente GOM ` ,`${body}`,attachments)
+    newMailer.enviarCorreo('randr014@contratistas.codelco.cl, randradeva@jej.cl, gcano001@codelco.cl, fleiv004@contratistas.codelco.cl , ffaundezrai@jej.cl,	mvega@jej.cl,	cjime013@contratistas.codelco.cl,	bbarahona@jej.cl,	oramos@jej.cl,	fleivaar@jej.cl,	oalva009@contratistas.codelco.cl,	dcari002@contratistas.codelco.cl,	rpino@jej.cl, gtorr011@contratistas.codelco.cl',`Aprendizaje de incidente GOM ` ,`${body}`,attachments)
 
   });
 
