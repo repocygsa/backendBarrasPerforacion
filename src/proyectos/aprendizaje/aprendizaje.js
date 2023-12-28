@@ -1218,7 +1218,7 @@ const fecOcurrencia =moment(valores.fec_ins).format('YYYY-MM-DD HH:mm')
     fk_actividad_4:valores.acc_Actividad_4,
     inc_rut_lider: valores.rut_usu ? valores.rut_usu : null,
     inc_estado:1,
-    inc_crea:'17.526.007-2',
+    inc_crea:valores.user,
     inc_fecha_hora_registro:fecha,
     fk_emp:valores.emp_inf,
     fk_ctto:valores.ctt_inf,
