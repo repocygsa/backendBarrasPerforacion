@@ -543,8 +543,25 @@ router.post("/getEmpresa", (req, res) => {
                 if(error) throw error;        
                 res.status(200).json({result})
             })
-        
-    
+});
+
+router.post('/getCorreosFlash',(req,res)=>{
+
+ 
+  const rutp = req.body.rut;
+
+
+          sql = `
+          SELECT * 
+    FROM gobm.inc_correos
+          WHERE est = 1
+          `;
+          conector.query(sql, [rutp], (error,result)=>{
+              if(error) throw error;        
+              res.status(200).json({result})
+          })
+      
+  
 
 });
 
@@ -615,7 +632,7 @@ router.post('/getCantidadId',(req,res)=>{
 
 
 
- const envioFlashSeguridad=(insertId, valores, accCorrectivaConcatenada,tipoIncidenteDesc, empresa, fileImg, calificaIncidenteDesc)=>{
+ const envioFlashSeguridad=(insertId, valores, accCorrectivaConcatenada,tipoIncidenteDesc, empresa, fileImg, calificaIncidenteDesc, accCorreos)=>{
   
   const incidenteFolder = `Incidente_${valores.ctt_inf}`;
   const imgPath = `${pathDocument}/${incidenteFolder}/img_${valores.pos_inf}_folio-${insertId}/${fileImg}`;
@@ -949,138 +966,7 @@ button:hover {
   conector.query(sql2,(err2,result2)=>{
     if(err2) throw err2
     newMailer.enviarCorreo(`
-    randr014@contratistas.codelco.cl, 
-    randradeva@jej.cl, 
-    gcano001@codelco.cl, 
-    fleiv004@contratistas.codelco.cl , 
-    ffaundezrai@jej.cl,	mvega@jej.cl,	
-    cjime013@contratistas.codelco.cl,	
-    bbarahona@jej.cl,	oramos@jej.cl,	
-    fleivaar@jej.cl,	
-    oalva009@contratistas.codelco.cl,	
-    dcari002@contratistas.codelco.cl,	
-    rpino@jej.cl, 
-    gtorr011@contratistas.codelco.cl
-    gsoto018@codelco.cl,
-opozo004@contratistas.codelco.cl,
-evielma@contratistas.codelco.cl,
-cjime013@contratistas.codelco.cl,
-carlos.medina@metrika.cl,
-sergio.gomez@metrika.cl,
-viviana.monroy@metrika.cl,
-raul.leiva@metrika.cl,
-jdonoso@jej.cl,
-mjara020@contratistas.codelco.cl,
-pduranya@jej.cl,
-agonz070@contratistas.codelco.cl,
-ereyes@jej.cl,
-agalazar@jej.cl,
-ggonz035@contratistas.codelco.cl,
-asoto@jej.cl,
-fleivaar@jej.cl,
-ffaundezrai@jej.cl,
-oramos@jej.cl,
-mvega@jej.cl,
-bbarahona@jej.cl,
-jcornejodv@jej.cl,
-cmorenoto@jej.cl,
-lmuno021@contratistas.codelco.cl,
-cfuentealba@jej.cl,
-cgaray@jej.cl,
-jjara@jej.cl,
-ppera004@contratistas.codelco.cl,
-cmonsalve@jej.cl,
-morellana@jej.cl,
-rquez008@contratistas.codelco.cl,
-paula.carreno@enaex.com,
-cristian.salvo@enaex.com,
-fleivaar@jej.cl,
-jdonoso@jej.cl,
-mjara020@contratistas.codelco.cl,
-pduranya@jej.cl,
-agonz070@contratistas.codelco.cl,
-ereyes@jej.cl,
-agalazar@jej.cl,
-ggonz035@contratistas.codelco.cl,
-asoto@jej.cl,
-Correo,
-pmuno038@codelco.cl,
-pacev005@contratistas.codelco.cl,
-edgardo.osses@enaex.com,
-mauricio.godoy@enaex.com,
-gsoto018@codelco.cl,
-evielma@contratistas.codelco.cl,
-opozo004@contratistas.codelco.cl,
-cjime013@contratistas.codelco.cl,
-sebastián.vega@bormax.cl,
-felipe.salinas@bormax.cl,
-natalia.vasquez@bormax.cl,
-maximo.valenzuela@bormax.cl,
-mauricio.ortiz@bormax.cl,
-ffaundezrai@jej.cl,
-oramos@jej.cl,
-mvega@jej.cl,
-bbarahona@jej.cl,
-jcornejodv@jej.cl,
-cmorenoto@jej.cl,
-lmuno021@contratistas.codelco.cl,
-cfuentealba@jej.cl,
-cgaray@jej.cl,
-jjara@jej.cl,
-ppera004@contratistas.codelco.cl,
-cmonsalve@jej.cl,
-morellana@jej.cl,
-rquez008@contratistas.codelco.cl,
-cbern011@codelco.cl,
-fmeza006@contratistas.codelco.cl,
-cjime013@contratistas.codelco.cl,
-mperez@georock.cl,
-seba.aravena.geo@gmail.com,
-c.72mella@gmail.com,
-rbustamante.georock@gmail.com,
-leivavictorgeorock@gmail.com,
-scarreno.georock@gmail.com,
-jdonoso@jej.cl,
-mjara020@contratistas.codelco.cl,
-pduranya@jej.cl,
-agonz070@contratistas.codelco.cl,
-ereyes@jej.cl,
-agalazar@jej.cl,
-ggonz035@contratistas.codelco.cl,
-asoto@jej.cl,
-fleivaar@jej.cl,
-ffaundezrai@jej.cl,
-oramos@jej.cl,
-mvega@jej.cl,
-bbarahona@jej.cl,
-jcornejodv@jej.cl,
-cmorenoto@jej.cl,
-lmuno021@contratistas.codelco.cl,
-cfuentealba@jej.cl,
-cgaray@jej.cl,
-jjara@jej.cl,
-ppera004@contratistas.codelco.cl,
-cmonsalve@jej.cl,
-morellana@jej.cl,
-rquez008@contratistas.codelco.cl,
-fbaci001@codelco.cl,
-ngome001@codelco.cl,
-jmedi001@codelco.cl,
-jaleg002@codelco.cl,
-fsoto022@codelco.cl,
-pgandara@codelco.cl,
-paray036@codelco.cl,
-easce001@codelco.cl,
-agara006@codelco.cl,
-nmunoz@jej.cl,
-dpineda@jej.cl,
-cguzmansan@jej.cl,
-cmoralesma@jej.cl,
-lmarti@jej.cl,
-gdrog008@contratistas.codelco.cl,
-pblamey@jej.cl,
-epardo@jej.cl,
-msaavedranun@jej.cl 
+    ${accCorreos}
     `,
     `Aprendizaje de incidente GOM ` ,
     `${body}`,attachments)
@@ -1170,6 +1056,13 @@ function generarListaHTML(valoresArray) {
     .filter(item => item.isReport === true)
     .map(item => `<li style="margin-bottom: 5px;">${item.acc_correctiva}( ${item.jerDesc})</li>`);
   return `<ul>${accCorrectivaArray.join('')}</ul>`;
+}
+
+function generarListaCorreo(valoresCorreos) {
+
+  const accCorrectivaCorreos = valoresCorreos
+    .map(item => `${item},`);
+  return accCorrectivaCorreos;
 }
 
 const pathDocument = process.env.PATH_DOCUMENT_CORR;
@@ -1308,6 +1201,7 @@ const fileInf = req.files.files_inf[0].originalname;
   const fecha = moment().format('YYYY-MM-DD HH:mm')
   const sql= "INSERT INTO inc_registro SET ?";
   const valArray=req.body.valoresArray
+  const valCorreo=req.body.correosArray
   const valores=req.body //.data.datos
 
 const fecOcurrencia =moment(valores.fec_ins).format('YYYY-MM-DD HH:mm')
@@ -1347,13 +1241,17 @@ const fecOcurrencia =moment(valores.fec_ins).format('YYYY-MM-DD HH:mm')
 
   conector.query(sql, datosArchivos, (error,result)=>{
     const arregloDeObjetos = valArray.map(jsonString => JSON.parse(jsonString));
+  //  const arregloDeCorreos = valCorreo.map(jsonString => JSON.parse(jsonString));
+
    
     if(error) throw error;   
     res.status(200).json({result})
     const accCorrectivaHTML = generarListaHTML(arregloDeObjetos);
+    const accCorreos =generarListaCorreo(valCorreo);
+  
     insertarDetalleIncidente(result.insertId, arregloDeObjetos)
      insertarArchIncidente(result.insertId, req.files.files_inf)
-     envioFlashSeguridad(result.insertId, valores, accCorrectivaHTML, valores.tipoIncidenteDesc, valores.empreDesc, fileImg, valores.calificaIncidenteDesc )
+     envioFlashSeguridad(result.insertId, valores, accCorrectivaHTML, valores.tipoIncidenteDesc, valores.empreDesc, fileImg, valores.calificaIncidenteDesc, accCorreos )
 
    /* if (error) throw error;
     console.log(result)
