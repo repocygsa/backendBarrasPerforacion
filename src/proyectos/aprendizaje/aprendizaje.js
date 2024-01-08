@@ -1433,7 +1433,7 @@ const fileInf = req.files.files_inf[0].originalname;
 
     setTimeout(() => {
       envioCorreo();
-    }, "10000");
+    }, "20000");
 
      
      // envioFlashSeguridad(result.insertId, valores, accCorrectivaHTML, valores.tipoIncidenteDesc, valores.empreDesc, fileImg, valores.calificaIncidenteDesc, accCorreos )
