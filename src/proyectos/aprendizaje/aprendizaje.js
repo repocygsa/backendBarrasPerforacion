@@ -1384,7 +1384,7 @@ router.post('/getDataReporte',(req,res)=>{
   inc_incidente AS quesucedio,
   inc_ruta_archivo AS evidencia,
   rch.nom AS rc,
-  med.medidas,
+  IFNULL(med.medidas, 'Sin acciones correctivas') AS medidas,
   inc_causas_principales AS causas,
   inc_consecuencias AS consecuencias,
   inc_aprendizaje AS aprendizaje
@@ -1406,8 +1406,9 @@ router.post('/getDataReporte',(req,res)=>{
   LEFT JOIN (
     SELECT 
     fk_id_incidente, 
-    GROUP_CONCAT(inc_med_correctiva) AS medidas
+    GROUP_CONCAT(inc_med_correctiva SEPARATOR '-|-') AS medidas
     FROM inc_registro_detalle
+    WHERE inc_det_reporte = 1
     GROUP BY fk_id_incidente
   ) med
   ON med.fk_id_incidente = inc.id
