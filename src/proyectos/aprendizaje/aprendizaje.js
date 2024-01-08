@@ -226,6 +226,39 @@ FROM
   });
 });
 
+router.post("/getIncidentesTran", (req, res) => {
+  
+  
+  const sql = `
+  SELECT
+	gobm.inc_registro_detalle.id, 
+	gobm.inc_registro_detalle.inc_det_fecha_cierre, 
+	gobm.inc_registro_detalle.inc_med_correctiva, 
+	gobm.inc_registro_detalle.inc_rut_responsable, 
+	gobm.inc_registro_detalle.inc_det_estado, 
+	gobm.inc_registro_detalle.inc_fec_cierre_real, 
+	gobm.inc_registro_detalle.fk_id_incidente, 
+  gobm.inc_registro_detalle.inc_obs, 
+  gobm.inc_registro_detalle.inc_complementada, 
+  DATEDIFF(NOW(), gobm.inc_registro_detalle.inc_det_fecha_cierre) AS dias_diferencia,
+	tofitobd.DotacionCC.Nombre
+FROM
+	gobm.inc_registro_detalle
+	INNER JOIN
+	tofitobd.DotacionCC
+	ON 
+		gobm.inc_registro_detalle.inc_rut_responsable = tofitobd.DotacionCC.Rut
+  where id > 0
+  
+  `;
+
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+
+    res.status(200).json({ result});
+  });
+});
+
 router.post("/getIncidentesArchDet", (req, res) => {
   
   const id = req.body.data ;
@@ -505,6 +538,77 @@ router.post("/getEmpresa", (req, res) => {
       
   });
 
+  router.post('/getTranversalId',(req,res)=>{
+  
+
+    const id = req.body.data;
+    sql = `
+    SELECT
+    tbl_ctto.num_ctto,
+    tbl_ctto.emp_ctto,
+    inc_registro.inc_incidente,
+    inc_registro_detalle.inc_med_correctiva,
+    tbl_empre.nom_empre,
+    inc_registro_tranversal.id,
+    inc_registro_detalle.id AS id_cab,
+    inc_registro_tranversal.inc_tran_estado,
+    inc_registro_tranversal.inc_fec_cierre,
+    inc_registro_tranversal.inc_obs_cierre 
+  FROM
+    inc_registro_tranversal
+    INNER JOIN tbl_ctto ON inc_registro_tranversal.fk_ctto = tbl_ctto.num_ctto
+    INNER JOIN inc_registro ON inc_registro_tranversal.fk_id_incidente = inc_registro.id
+    INNER JOIN inc_registro_detalle ON inc_registro_tranversal.fk_id_incidente_detalle = inc_registro_detalle.id
+    INNER JOIN tbl_empre ON tbl_ctto.emp_ctto = tbl_empre.rut_empre
+  Where 
+  inc_registro_tranversal.fk_id_incidente =${id}
+  ORDER BY
+    id_cab ASC
+    `;
+    conector.query(sql, (error,result)=>{
+      if(error) throw error;        
+      res.status(200).json({result})
+    })
+      
+  });
+
+  router.post('/eliminarAccionTranversal',(req,res)=>{
+  
+
+    const id = req.body.data.id;
+    const obs = req.body.data.mant_obs;
+    sql = `
+   
+    UPDATE inc_registro_tranversal SET inc_tran_estado = 4, inc_obs_cierre ='${obs}', inc_fec_cierre='${moment().format('YYYY-MM-DD HH:mm')}'
+    WHERE 
+    inc_registro_tranversal.fk_id_incidente =${id}
+    `;
+    conector.query(sql, (error,result)=>{
+      if(error) throw error;        
+      res.status(200).json({result})
+    })
+      
+  });
+
+  router.post('/getCorrectivaId',(req,res)=>{
+  
+
+    const id = req.body.data;
+    
+    sql = `
+    SELECT * FROM inc_registro_detalle WHERE id = ${id}
+    `;
+    conector.query(sql, (error,result)=>{
+      if(error) throw error;        
+      res.status(200).json({result})
+    })
+      
+  });
+
+ 
+
+  
+
 
   router.post('/getContratos',(req,res)=>{
   
@@ -653,7 +757,7 @@ router.post('/getCantidadId',(req,res)=>{
     {
       filename: fileImg,
       // path: `${process.env.PATH_DOCUMENT_CARTA_LORO}/src/Mail/images/fotoArchivos.png`,
-      path: `${imgPath}`,
+      path: `${utf8.decode(imgPath)}`,
       cid: "file_img",
     },
   ]
@@ -987,7 +1091,7 @@ const insertarDetalleIncidente = (insertId, valArray) => {
           } else {
               const nuevoInsertId = result2.insertId;
               if (corr.contratos && corr.contratos.length > 0) {
-              insertarTranversal(insertId, nuevoInsertId,corr.contratos)
+             // insertarTranversal(insertId, nuevoInsertId,corr.contratos)
               }
               // Aquí puedes hacer algo con el nuevo insertId
           }
@@ -1042,6 +1146,52 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
       });
       
     }
+
+   
+    router.post('/AgregarAccionTranversal', async (req, res) => {
+      const valCtto = req.body.data.contratos;
+      const insertId = req.body.data.id;
+      const insertIdDet = req.body.data.med_corr;
+      let result; // Cambiando a una variable única
+    
+      try {
+        for (const corr of valCtto) {
+          const sql2 =
+            'INSERT INTO inc_registro_tranversal (fk_emp, fk_ctto, fk_id_incidente, fk_id_incidente_detalle, inc_tran_estado) VALUES (?, ?, ?,?,?)';
+          result = await new Promise((resolve, reject) => {
+            conector.query(
+              sql2,
+              [0, corr, insertId, insertIdDet, 0],
+              (err, result) => {
+                if (err) reject(err);
+                resolve(result);
+              }
+            );
+          });
+        }
+    
+        res.status(200).json({ result });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error en el servidor' });
+      }
+    });
+    
+    router.post('/getContratosCst',(req,res)=>{
+      console.log(req.body.data)
+  const rut = req.body.data
+ 
+      sql = `
+      SELECT *
+      FROM inc_cst_contratos
+      WHERE fk_cst_rut = ${rut}
+      `
+      conector.query(sql, (error,result)=>{
+      if(error) throw error;        
+        res.status(200).json({result})
+      })
+    
+    });
 
 /*  function generarListaHTML(valoresArray) {
     const accCorrectivaArray = valoresArray
@@ -1113,6 +1263,8 @@ const storage_cab = multer.diskStorage({
     });
 
   },
+
+  
   filename: function (req, file, cb) {
 
     const incidenteFolder = `Incidente_${req.body.ctt_inf}`;
@@ -1132,7 +1284,9 @@ const storage_cab = multer.diskStorage({
 
       rutaBuscar = `${pathDocument}/${incidenteFolder}/img_${req.body.pos_inf}/${utf8.decode(
         file.originalname
-      )}`;
+      )}`; 
+
+
       }
    
 
@@ -1264,6 +1418,7 @@ const fecOcurrencia =moment(valores.fec_ins).format('YYYY-MM-DD HH:mm')
   })
 
 });
+
 
 
 
