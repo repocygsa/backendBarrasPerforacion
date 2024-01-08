@@ -4,58 +4,35 @@ const jwt = require('jsonwebtoken');
 const moment = require('moment');
 moment.locale('es');
 
+
 const MailServer = require('../../Mail/Mail');
 const newMailer = new MailServer();
+const Plantilla = require('../../Mail/MailTemplates/reporteAprendizaje/correoVacio')
+const planti = new Plantilla()
 
-const sendCodePass = require('../../Mail/MailTemplates/docu_trabajadores/sendCodePassDocu');
+
 const multer = require('multer');
-const bodyMail = new sendCodePass();
-
-
 
 var JSZip = require("jszip");
 const fs = require("fs");
 const utf8 = require("utf8");
 
+const generarImages = require('../../puppeteer/generarImg');
 
 
-router.post('/getPermisoSessionAprendizaje',(req,res)=>{
-    
-  const {rut, ctto} = req.body.res.data;
-  const sql = `SELECT * FROM aprendizaje_usuarios WHERE rut = ? `
-
-  conector.query(sql,[rut],(err, result)=>{
-
-    if(err) throw err   
-
-    let user = '';
-
-    // Si existe en la tabla tiene un permiso y puede hacer otras cosas, de lo contrario es un usuario de la appsgom que sólo puede pedir epp si es jej
-    if(result.length>0){
-      
-      user={
-        rutUsu:result[0].rut,            
-        perUsu:result[0].fk_perfil,
-        cttUsu:ctto
-      }
-      
-      res.status(200).json({user});
-
-    }else{
-
-      user={
-        rutUsu:rut,
-        perUsu:3,
-        cttUsu:ctto
-      }
-    
-      res.status(200).json({user});
-
-    }
-        
-  })
-
- })
+ router.post("/getPermisoSessionAprendizaje", (req, res) => {
+  const datosSesion = req.body.res.data
+  let rut= ""
+  if (req.body.res.data.rut) {
+    rut = req.body.res.data.rut
+  }
+ 
+  const sql = `select * from aprendizaje_usuarios where rut=?`;
+    conector.query(sql,[rut], (err, result) => {
+    if (err) throw err;
+      res.status(200).json({permiso:result,datosSesion});
+    })
+})
 
 
 
@@ -631,7 +608,7 @@ router.post('/getCantidadId',(req,res)=>{
 
 
 
-
+/*
  const envioFlashSeguridad=(insertId, valores, accCorrectivaConcatenada,tipoIncidenteDesc, empresa, fileImg, calificaIncidenteDesc, accCorreos)=>{
   
   const incidenteFolder = `Incidente_${valores.ctt_inf}`;
@@ -669,8 +646,8 @@ router.post('/getCantidadId',(req,res)=>{
 <style>
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #f4f6f9; /* Gris claro */
-  color: #37474f; /* Gris oscuro */
+  background-color: #f4f6f9; 
+  color: #37474f; 
   margin: 0;
   padding: 0;
   display: flex;
@@ -683,11 +660,11 @@ body {
 .card {
   max-width: 800px;
   width: 100%;
-  background-color: #fff; /* Blanco */
+  background-color: #fff; 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   overflow: hidden;
-  border: 2px solid #e1e8ed; /* Gris más claro */
+  border: 2px solid #e1e8ed; 
   margin-bottom: 20px;
 }
 
@@ -696,8 +673,8 @@ body {
 }
 
 .banner {
-  background-color: #3498db; /* Celeste */
-  color: #fff; /* Blanco */
+  background-color: #3498db; 
+  color: #fff; 
   text-align: center;
   padding: 10px;
   border-radius: 5px 5px 0 0;
@@ -707,17 +684,17 @@ body {
 
 .section-card {
   flex: 1;
-  min-width: 200px; /* O el ancho que prefieras */
-  background-color: #e1e8ed; /* Gris más claro */
-  color: #37474f; /* Gris oscuro */
+  min-width: 200px; 
+  background-color: #e1e8ed; 
+  color: #37474f; 
  
   padding: 15px;
   margin-bottom: 5px;
 }
 
 .section-card2 {
-  background-color: #e1e8ed; /* Gris más claro */
-  color: #37474f; /* Gris oscuro */
+  background-color: #e1e8ed; 
+  color: #37474f; 
   border-radius: 5px;
   padding: 10px;
   margin-bottom: 15px;
@@ -728,13 +705,13 @@ body {
 .icon {
   font-size: 24px;
   margin-right: 10px;
-  color: #3498db; /* Celeste */
+  color: #3498db; 
 }
 
 label {
   display: block;
   margin-bottom: 5px;
-  color: #546e7a; /* Gris medio */
+  color: #546e7a;
 }
 
 p {
@@ -759,8 +736,8 @@ p {
 }
 
 button {
-  background-color: #3498db; /* Celeste */
-  color: #fff; /* Blanco */
+  background-color: #3498db; 
+  color: #fff; 
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
@@ -769,7 +746,7 @@ button {
 }
 
 button:hover {
-  background-color: #2980b9; /* Celeste más oscuro */
+  background-color: #2980b9; 
 }
 
 .email-content {
@@ -790,7 +767,7 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #3498db; /* Fondo del contenedor - celeste */
+  background-color: #3498db; 
 }
 
 .banner img {
@@ -802,11 +779,11 @@ button:hover {
 
 
 .title {
-  flex-grow: 1; /* El título crecerá para ocupar el espacio restante */
+  flex-grow: 1; 
   text-align: center;
-  background-color: #3498db; /* Color de fondo del título */
-  padding: 10px; /* Añadir relleno al título */
-  color: #fff; /* Color del texto del título */
+  background-color: #3498db; 
+  padding: 10px; 
+  color: #fff;
 }
 
 .half-width {
@@ -850,7 +827,6 @@ button:hover {
       <div class="section-card">
       <h3>📅<i class="email-content"></i> Fecha y Hora</h3>
        
-        <p>${moment(valores.fec_ins).format('DD-MM-YYYY HH:mm')}
         </p>
       </div>
 
@@ -976,12 +952,61 @@ button:hover {
 
 }
 
+*/
+
+
+
+
+
+const buscarCorreos=()=>{
+  return new Promise(res=>{
+    let sql=`
+    SELECT correo 
+    FROM inc_correos
+    WHERE est = 1
+    `
+    conector.query(sql, (err, result) => {
+      if (err) throw err;
+        res(result)
+    });
+  })
+}
+
+
+const envioCorreo = async()=>{
+
+  let attachments = [
+    {
+      filename: 'reporte.png',
+      path: `${process.env.PATH_DOCUMENT_APE}/reportes/reporte.png`,
+      cid: "reporte",
+    }
+  ]
+
+  const plantilla = planti.setBody()
+
+  const correosAEnviar = await buscarCorreos()
+  let listaCorreos=[]  // acá se almacenan los correos de los administradores para ser enviados
+
+  correoVerificacion = 'randr014@contratistas.codelco.cl'
+
+  correosAEnviar.map(correoReporte=>{
+    listaCorreos.push(correoReporte.correo)
+  })
+
+  newMailer.enviarCorreo(correoVerificacion, listaCorreos,'Aprendizaje de incidente GOM', plantilla, attachments)
+
+};
+
+
+
+
   
 
 const insertarDetalleIncidente = (insertId, valArray) => {
   valArray.forEach(corr => {
       const sql2 = 'INSERT INTO inc_registro_detalle (fk_id_incidente, inc_det_fecha_cierre, inc_med_correctiva, inc_rut_responsable, inc_det_estado, inc_fec_cierre_real, inc_det_reporte, fk_jerarquia) VALUES (?, ?, ?, ?,?,?,?,?)';
-      conector.query(sql2, [insertId, corr.fec_cierre, corr.acc_correctiva, corr.rut_responsable,  1, moment().format('YYYY-MM-DD HH:mm'), corr.isReport, corr.fk_jerarquia], (err2, result2) => {
+      conector.query(sql2, [insertId, corr.fec_cierre, corr.acc_correctiva, corr.rut_responsable,  1, new Date(), corr.isReport, corr.fk_jerarquia], (err2, result2) => {
           if (err2) {
               throw err2;
           } else {
@@ -1007,7 +1032,7 @@ valArch.forEach(corr => {
 
 
     const sql2 = 'INSERT INTO inc_archivos (fk_inc_id, inc_arch_fecha, inc_arch_ruta,inc_arch_nom) VALUES (?, ?, ?,?)';
-    conector.query(sql2,[insertId, moment().format('YYYY-MM-DD HH:mm'),corr.path, corr.originalname],(err2,result2)=>{
+    conector.query(sql2,[insertId, new Date(),corr.path, corr.originalname],(err2,result2)=>{
       if(err2) throw err2
     });
 
@@ -1022,7 +1047,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
      
   
       const sql2 = 'INSERT INTO inc_archivos_detalle (fk_inc_detalle, inc_arch_det_fecha, inc_arch_det_ruta, inc_arch_det_nom) VALUES (?, ?, ?,?)';
-      conector.query(sql2,[insertId, moment().format('YYYY-MM-DD HH:mm'),corr.path, corr.filename],(err2,result2)=>{
+      conector.query(sql2,[insertId, new Date(),corr.path, corr.filename],(err2,result2)=>{
         if(err2) throw err2
       });
   
@@ -1196,15 +1221,13 @@ router.post("/guardarIncidente", uploadDocumentCab.fields([{
 const fileInf = req.files.files_inf[0].originalname;
 
 
-
-
-  const fecha = moment().format('YYYY-MM-DD HH:mm')
+  const fecha = new Date()
   const sql= "INSERT INTO inc_registro SET ?";
   const valArray=req.body.valoresArray
   const valCorreo=req.body.correosArray
   const valores=req.body //.data.datos
 
-const fecOcurrencia =moment(valores.fec_ins).format('YYYY-MM-DD HH:mm')
+  const fecOcurrencia =moment(valores.fec_ins).format('YYYY-MM-DD HH:mm')
 
 
   let datosArchivos = {
@@ -1246,12 +1269,20 @@ const fecOcurrencia =moment(valores.fec_ins).format('YYYY-MM-DD HH:mm')
    
     if(error) throw error;   
     res.status(200).json({result})
-    const accCorrectivaHTML = generarListaHTML(arregloDeObjetos);
-    const accCorreos =generarListaCorreo(valCorreo);
+    // const accCorrectivaHTML = generarListaHTML(arregloDeObjetos);
+    // const accCorreos =generarListaCorreo(valCorreo);
   
     insertarDetalleIncidente(result.insertId, arregloDeObjetos)
-     insertarArchIncidente(result.insertId, req.files.files_inf)
-     envioFlashSeguridad(result.insertId, valores, accCorrectivaHTML, valores.tipoIncidenteDesc, valores.empreDesc, fileImg, valores.calificaIncidenteDesc, accCorreos )
+    insertarArchIncidente(result.insertId, req.files.files_inf)
+
+    generaFoto(result.insertId);
+
+    setTimeout(() => {
+      envioCorreo();
+    }, "10000");
+
+     
+     // envioFlashSeguridad(result.insertId, valores, accCorrectivaHTML, valores.tipoIncidenteDesc, valores.empreDesc, fileImg, valores.calificaIncidenteDesc, accCorreos )
 
    /* if (error) throw error;
     console.log(result)
@@ -1308,7 +1339,7 @@ const storage_corr = multer.diskStorage({
   const fileMan = req.files[0].filename;
   const datoEnMinusculas = fileMan.toLowerCase();
   const datos = req.body;
-  const sql= `UPDATE inc_registro_detalle  SET inc_det_estado = 3, inc_obs='${datos.mant_obs}', inc_fec_cierre_real = '${moment().format('YYYY-MM-DD HH:mm')}'
+  const sql= `UPDATE inc_registro_detalle  SET inc_det_estado = 3, inc_obs='${datos.mant_obs}', inc_fec_cierre_real = ${new Date()}
               WHERE id = ${datos.id}  
   
   `;
@@ -1330,6 +1361,76 @@ const storage_corr = multer.diskStorage({
 
 });
 
+
+
+
+
+/* REPORTERIA */
+
+router.post('/getDataReporte',(req,res)=>{
+  
+  const { id } = req.body;
+
+  sql = `
+  SELECT
+  emp.nom_empre AS empresa,
+  inc.inc_fec_ocurrencia AS fecha,
+  inc.inc_lugar AS lugar,
+  min.nom AS mina,
+  are.nom AS area,
+  niv.nom AS nivel,
+  tip.tip_inc_desc AS tipo,
+  cal.cal_incidente_desc AS calificacion,
+  inc_incidente AS quesucedio,
+  inc_ruta_archivo AS evidencia,
+  rch.nom AS rc,
+  med.medidas,
+  inc_causas_principales AS causas,
+  inc_consecuencias AS consecuencias,
+  inc_aprendizaje AS aprendizaje
+  FROM inc_registro inc
+  INNER JOIN tbl_empre emp
+  ON emp.rut_empre = inc.fk_emp
+  INNER JOIN rep_mina min
+  ON min.id = inc.fk_mina
+  INNER JOIN rep_area are
+  ON are.id = inc.fk_area
+  INNER JOIN rep_nivel niv
+  ON niv.id = inc.fk_nivel
+  INNER JOIN inc_tipo_incidente tip
+  ON tip.id = inc.fk_tip_incidente
+  INNER JOIN inc_calificacion_incidente cal
+  ON cal.id = inc.fk_cal_incidente
+  INNER JOIN hal_seg_rc rch
+  ON rch.id = inc.fk_rc
+  LEFT JOIN (
+    SELECT 
+    fk_id_incidente, 
+    GROUP_CONCAT(inc_med_correctiva) AS medidas
+    FROM inc_registro_detalle
+    GROUP BY fk_id_incidente
+  ) med
+  ON med.fk_id_incidente = inc.id
+  WHERE inc.id = ?
+  `
+  conector.query(sql, [id], (error,result)=>{
+  if(error) throw error;        
+    res.status(200).json({result})
+  })
+
+});
+
+
+
+const generaFoto=async(insertId)=>{
+
+  const imageBuffer = await generarImages({
+    url : `${process.env.DOMINIO}/web/accionesCorrectivas/reporteCorreo?id=${insertId}`
+  })
+ 
+  fs.writeFileSync("./reportes/reporte.png", imageBuffer);
+
+};
 
 
 module.exports = router;
