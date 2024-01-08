@@ -1538,25 +1538,25 @@ router.post('/getDataReporte',(req,res)=>{
   cal.cal_incidente_desc AS calificacion,
   inc_incidente AS quesucedio,
   inc_ruta_archivo AS evidencia,
-  rch.nom AS rc,
+  IFNULL(rch.nom, 'Sin riesgo crítico asociado') AS rc,
   IFNULL(med.medidas, 'Sin acciones correctivas') AS medidas,
   inc_causas_principales AS causas,
   inc_consecuencias AS consecuencias,
   inc_aprendizaje AS aprendizaje
   FROM inc_registro inc
-  INNER JOIN tbl_empre emp
+  LEFT JOIN tbl_empre emp
   ON emp.rut_empre = inc.fk_emp
-  INNER JOIN rep_mina min
+  LEFT JOIN rep_mina min
   ON min.id = inc.fk_mina
-  INNER JOIN rep_area are
+  LEFT JOIN rep_area are
   ON are.id = inc.fk_area
-  INNER JOIN rep_nivel niv
+  LEFT JOIN rep_nivel niv
   ON niv.id = inc.fk_nivel
-  INNER JOIN inc_tipo_incidente tip
+  LEFT JOIN inc_tipo_incidente tip
   ON tip.id = inc.fk_tip_incidente
-  INNER JOIN inc_calificacion_incidente cal
+  LEFT JOIN inc_calificacion_incidente cal
   ON cal.id = inc.fk_cal_incidente
-  INNER JOIN hal_seg_rc rch
+  LEFT JOIN hal_seg_rc rch
   ON rch.id = inc.fk_rc
   LEFT JOIN (
     SELECT 
