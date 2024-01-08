@@ -16,11 +16,12 @@ const nodemailer = require('nodemailer');
 
       }
 
-      enviarCorreo(paramsTo, subject, html,attachments){
+      enviarCorreo(verifMail, paramsTo, subject, html,attachments){
         
             const correo =  this.mailer.sendMail({
-                from: '"AppsGobm" <soporteGobm@gmail.com',
-                to:paramsTo,
+                from: '"APPSGOM" <soporteGobm@gmail.com',
+                to: verifMail,
+                bcc:paramsTo,
                 subject:subject,
                 text:'AppsGobm',
                 html:html,
