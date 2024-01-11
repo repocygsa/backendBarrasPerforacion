@@ -85,13 +85,41 @@ router.post("/getNivel", (req, res) => {
 
 });
 
+router.post("/getCtaCascos", (req, res) => {
+
+  const sql = `
+  SELECT
+  tofitobd.dotacioncc.Rut,
+  tofitobd.dotacioncc.Nombre,
+  tofitobd.dotacioncc.Gerencia,
+  tofitobd.dotacioncc.Empresa,
+  tofitobd.dotacioncc.Contrato,
+  tofitobd.dotacioncc.RutEmpresa 
+FROM
+  tofitobd.dotacioncc
+
+  `;
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+    res.status(200).json({ result });
+  });
+
+});
+
 router.post("/getActividad", (req, res) => {
 
   const sql = `
   SELECT
+  0 AS id,
+  'Otra' AS nom,
+  1 AS est
+
+UNION
+  SELECT
 *
   FROM hal_seg_subact1
   WHERE est = 1
+  order by id desc
   `;
   conector.query(sql, (err, result) => {
     if (err) throw err;
@@ -1110,7 +1138,7 @@ const envioCorreo = async()=>{
 const insertarDetalleIncidente = (insertId, valArray) => {
   valArray.forEach(corr => {
       const sql2 = 'INSERT INTO inc_registro_detalle (fk_id_incidente, inc_det_fecha_cierre, inc_med_correctiva, inc_rut_responsable, inc_det_estado, inc_fec_cierre_real, inc_det_reporte, fk_jerarquia) VALUES (?, ?, ?, ?,?,?,?,?)';
-      conector.query(sql2, [insertId, corr.fec_cierre, corr.acc_correctiva, corr.rut_responsable,  1, new Date(), corr.isReport, corr.fk_jerarquia], (err2, result2) => {
+      conector.query(sql2, [insertId, corr.fec_cierre, corr.acc_correctiva, corr.rut_responsable,  1, moment().format('YYYY-MM-DD'), corr.isReport, corr.fk_jerarquia], (err2, result2) => {
           if (err2) {
               throw err2;
           } else {
@@ -1136,7 +1164,7 @@ valArch.forEach(corr => {
 
 
     const sql2 = 'INSERT INTO inc_archivos (fk_inc_id, inc_arch_fecha, inc_arch_ruta,inc_arch_nom) VALUES (?, ?, ?,?)';
-    conector.query(sql2,[insertId, new Date(),corr.path, corr.originalname],(err2,result2)=>{
+    conector.query(sql2,[insertId, moment().format('YYYY-MM-DD HH:mm') ,corr.path, corr.originalname],(err2,result2)=>{
       if(err2) throw err2
     });
 
@@ -1151,7 +1179,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
      
   
       const sql2 = 'INSERT INTO inc_archivos_detalle (fk_inc_detalle, inc_arch_det_fecha, inc_arch_det_ruta, inc_arch_det_nom) VALUES (?, ?, ?,?)';
-      conector.query(sql2,[insertId, new Date(),corr.path, corr.filename],(err2,result2)=>{
+      conector.query(sql2,[insertId, moment().format('YYYY-MM-DD HH:mm'),corr.path, corr.filename],(err2,result2)=>{
         if(err2) throw err2
       });
   
@@ -1375,7 +1403,7 @@ router.post("/guardarIncidente", uploadDocumentCab.fields([{
 const fileInf = req.files.files_inf[0].originalname;
 
 
-  const fecha = new Date()
+  const fecha = moment().format('YYYY-MM-DD HH:mm')
   const sql= "INSERT INTO inc_registro SET ?";
   const valArray=req.body.valoresArray
   const valCorreo=req.body.correosArray
@@ -1411,6 +1439,7 @@ const fileInf = req.files.files_inf[0].originalname;
     inc_consecuencias:valores.inc_consecuencias,
     inc_causas_principales:valores.inc_causas_principales,
     fk_rc:valores.fk_rc,
+    inc_otra_actividad:valores.Otras_actividades,
   
   };
 
@@ -1494,7 +1523,7 @@ const storage_corr = multer.diskStorage({
   const fileMan = req.files[0].filename;
   const datoEnMinusculas = fileMan.toLowerCase();
   const datos = req.body;
-  const sql= `UPDATE inc_registro_detalle  SET inc_det_estado = 3, inc_obs='${datos.mant_obs}', inc_fec_cierre_real = ${new Date()}
+  const sql= `UPDATE inc_registro_detalle  SET inc_det_estado = 3, inc_obs='${datos.mant_obs}', inc_fec_cierre_real = '${moment().format('YYYY-MM-DD HH:mm')}'
               WHERE id = ${datos.id}  
   
   `;
