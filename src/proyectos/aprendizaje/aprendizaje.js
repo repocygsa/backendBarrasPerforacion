@@ -89,14 +89,14 @@ router.post("/getCtaCascos", (req, res) => {
 
   const sql = `
   SELECT
-  tofitobd.dotacioncc.Rut,
-  tofitobd.dotacioncc.Nombre,
-  tofitobd.dotacioncc.Gerencia,
-  tofitobd.dotacioncc.Empresa,
-  tofitobd.dotacioncc.Contrato,
-  tofitobd.dotacioncc.RutEmpresa 
+  tofitobd.DotacionCC.Rut,
+  tofitobd.DotacionCC.Nombre,
+  tofitobd.DotacionCC.Gerencia,
+  tofitobd.DotacionCC.Empresa,
+  tofitobd.DotacionCC.Contrato,
+  tofitobd.DotacionCC.RutEmpresa 
 FROM
-  tofitobd.dotacioncc
+  tofitobd.DotacionCC
 
   `;
   conector.query(sql, (err, result) => {
