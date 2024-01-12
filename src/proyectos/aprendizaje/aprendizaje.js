@@ -236,24 +236,34 @@ router.post("/getIncidentesTran", (req, res) => {
   
   const sql = `
   SELECT
-	gobm.inc_registro_detalle.id, 
-	gobm.inc_registro_detalle.inc_det_fecha_cierre, 
-	gobm.inc_registro_detalle.inc_med_correctiva, 
-	gobm.inc_registro_detalle.inc_rut_responsable, 
-	gobm.inc_registro_detalle.inc_det_estado, 
-	gobm.inc_registro_detalle.inc_fec_cierre_real, 
-	gobm.inc_registro_detalle.fk_id_incidente, 
+  gobm.inc_registro_detalle.id, 
+  gobm.inc_registro_detalle.inc_det_fecha_cierre, 
+  gobm.inc_registro_detalle.inc_med_correctiva, 
+  gobm.inc_registro_detalle.inc_rut_responsable, 
+  gobm.inc_registro_detalle.inc_det_estado, 
+  gobm.inc_registro_detalle.inc_fec_cierre_real, 
+  gobm.inc_registro_detalle.fk_id_incidente, 
   gobm.inc_registro_detalle.inc_obs, 
   gobm.inc_registro_detalle.inc_complementada, 
   DATEDIFF(NOW(), gobm.inc_registro_detalle.inc_det_fecha_cierre) AS dias_diferencia,
-	tofitobd.DotacionCC.Nombre
+  tofitobd.DotacionCC.Nombre,
+  CASE
+      WHEN EXISTS (
+          SELECT 1
+          FROM gobm.inc_registro_tranversal
+          WHERE fk_id_incidente = gobm.inc_registro_detalle.fk_id_incidente
+      ) THEN 'complementado'
+      ELSE 'sin complementar'
+  END AS estado_complemento
 FROM
-	gobm.inc_registro_detalle
-	INNER JOIN
-	tofitobd.DotacionCC
-	ON 
-		gobm.inc_registro_detalle.inc_rut_responsable = tofitobd.DotacionCC.Rut
-  where id > 0
+  gobm.inc_registro_detalle
+INNER JOIN
+  tofitobd.DotacionCC
+ON 
+  gobm.inc_registro_detalle.inc_rut_responsable = tofitobd.DotacionCC.Rut
+WHERE
+  gobm.inc_registro_detalle.id > 0;
+
   
   `;
 
@@ -322,7 +332,9 @@ router.post("/getIncidentes", (req, res) => {
   const bEmpresa = empresa !== '0' ? `AND gobm.inc_registro.fk_emp ='${req.body.data.emp_inf}' ` : '';
   const bCtto = ctto !== 'Todo' ? `AND gobm.inc_registro.fk_ctto ='${req.body.data.ctt_inf}' ` : '';
   const bTexto = req.body.data.pos_inf ? `AND gobm.inc_registro.inc_incidente like '%${req.body.data.pos_inf}%' ` : '';
+  const bId = req.body.data.id? `AND gobm.inc_registro.id ='${req.body.data.id}' ` : '';
 
+  
   const updateSql = `
       UPDATE gobm.inc_registro
       SET inc_estado = 2
@@ -414,6 +426,7 @@ router.post("/getIncidentes", (req, res) => {
           ${bEmpresa}
           ${bCtto}
           ${bTexto}
+          ${bId}
           ORDER BY inc_registro.inc_fecha_hora_registro DESC;
       `;
 
@@ -1233,11 +1246,14 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
     router.post('/getContratosCst',(req,res)=>{
       console.log(req.body.data)
   const rut = req.body.data
+
+  bCst=rut?`fk_cst_rut = ${rut}`:''
  
       sql = `
       SELECT *
       FROM inc_cst_contratos
-      WHERE fk_cst_rut = ${rut}
+      WHERE id > 0 
+      ${bCst}
       `
       conector.query(sql, (error,result)=>{
       if(error) throw error;        
