@@ -7,8 +7,8 @@ const nodemailer = require('nodemailer');
           this.mailer = nodemailer.createTransport({
             service:'gmail',
             auth: {
-              user: 'appsgobmsoporte@gmail.com',
-              pass: 'knmrwznhmwhcmgfs',
+              user: 'soporteappsgom@gmail.com',
+              pass: 'dbtnkchonajiqwkx',
             }
 
 
@@ -19,7 +19,7 @@ const nodemailer = require('nodemailer');
       enviarCorreo(verifMail, paramsTo, subject, html,attachments){
         
             const correo =  this.mailer.sendMail({
-                from: '"APPSGOM" <soporteGobm@gmail.com',
+                from: '"APPSGOM" <soporteappsgom@gmail.com',
                 to: verifMail,
                 bcc:paramsTo,
                 subject:subject,
