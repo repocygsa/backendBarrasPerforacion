@@ -507,6 +507,7 @@ router.post("/getEmpresa", (req, res) => {
   
   });
   
+  
 
   router.post('/getContratosEmpresa',(req,res)=>{
   
