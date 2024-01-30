@@ -398,23 +398,23 @@ router.post("/getIncidentes", (req, res) => {
 				CONCAT( hal_seg_rc.cod_sigo, ' - ', hal_seg_rc.nom) AS concat_rc,
       DATEDIFF(NOW(), gobm.inc_registro.inc_fec_ocurrencia) AS dias_diferencia,
       -- Contar registros en inc_registro_detalle para esta cabecera
-      (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id) AS cuenta_detalle,
+      (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND fk_ctto IS NULL) AS cuenta_detalle,
       -- Contar registros con inc_det_fecha_cierre mayor a la actual para esta cabecera
-      (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND inc_det_fecha_cierre > NOW()) AS cuenta_fecha_cierre,
+      (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND inc_det_fecha_cierre > NOW() AND fk_ctto IS NULL) AS cuenta_fecha_cierre,
       -- Contar registros en estado inc_det_estado=3 para esta cabecera
-      (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND inc_det_estado = 3) AS cuenta_estado,
+      (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND inc_det_estado = 3 AND fk_ctto IS NULL) AS cuenta_estado,
       CONCAT(
-        (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND inc_det_estado = 3),
+        (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND inc_det_estado = 3 AND fk_ctto IS NULL),
         ' de ',
-        (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id),
+        (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND fk_ctto IS NULL),
         ' (',
-        (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id And inc_det_estado <3 AND inc_det_fecha_cierre < CURRENT_DATE),
+        (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id And inc_det_estado <3 AND inc_det_fecha_cierre < CURRENT_DATE AND fk_ctto IS NULL),
         ' atrasadas)'
     ) AS texto_resultado,
     -- Calcular porcentaje en base a cuenta_estado y cuenta_detalle
     CASE
-        WHEN (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id ) > 0 THEN
-            ROUND((SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND inc_det_estado = 3 AND fk_ctto IS NULL) / (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id) * 100, 2)
+        WHEN (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND fk_ctto IS NULL ) > 0 THEN
+            ROUND((SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND inc_det_estado = 3 AND fk_ctto IS NULL) / (SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_id_incidente = gobm.inc_registro.id AND fk_ctto IS NULL) * 100, 2)
         ELSE
             0
     END AS porcentaje_estado_3
@@ -653,6 +653,8 @@ router.post("/getEmpresa", (req, res) => {
 
     const id = req.body.data.id;
     const obs = req.body.data.mant_obs;
+const user = req.body.data.usuario.usuario
+    
     sql = `
    
     UPDATE inc_registro_detalle SET inc_det_estado = 4, inc_obs ='${obs}',  inc_complementada = 3, inc_fec_cierre_real='${moment().format('YYYY-MM-DD HH:mm')}'
@@ -662,7 +664,7 @@ router.post("/getEmpresa", (req, res) => {
     conector.query(sql, (error,result)=>{
       if(error) throw error;        
       res.status(200).json({result})
-      setLog(id, id, '17.526.007-2', obs)
+      setLog(id, id, user, obs)
     })
       
   });
@@ -1393,12 +1395,14 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
     router.post('/AgregarAccionTranversal', async (req, res) => {
       const id_incidente = req.body.data.id_incidente;
       const id_medida = req.body.data.id_medida;
-      const usuario = req.body.data.usuario.usuario;
+      const usuario = req.body.data.usuario;
       const responsable = req.body.data.rut_usu;
       const fec_cierre = req.body.data.fec_cierre;
       const fk_jerarquia = req.body.data.fk_jerarquia;
       const valCtto = req.body.data.contratos_cst;
       const medidaCorrDesc =req.body.data.medidaCorrDesc;
+
+      
     
       deleteTranId(id_incidente, id_medida, valCtto)
       // Crear una función que devuelve una promesa para la inserción de un contrato
@@ -1422,7 +1426,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
 
         const result = await Promise.all(valCtto.map(insertContrato));
         updateAccionId(id_medida)
-        setLog(id_incidente, id_medida, '17.526.007-2', 'Inserción de medida a tranversalización')
+        setLog(id_incidente, id_medida, usuario, 'Inserción de medida a tranversalización')
         // Enviar la respuesta después de que todas las inserciones se completen
         res.status(200).json({ result });
       //  res.status(200).json({ result });
@@ -1562,6 +1566,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
       const id= req.body.data.datos.fk_id_incidente
       const ctto = req.body.data.ctto
       const usuario = req.body.data.usuario
+     
       deleteTranId(id, idDet, ctto)
       const sql2 =
       'INSERT INTO inc_registro_detalle (fk_id_incidente, fk_ctto, inc_det_id_comp,inc_complementada ) VALUES (?,?,?,?)';
@@ -1572,7 +1577,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
         if (err) reject(err);
 
         res.status(200).json({result})
-        setLog(id, idDet, '17.526.007-2', 'Medida queda en estado N/A')
+        setLog(id, idDet, usuario, 'Medida queda en estado N/A')
       }
     );
 
@@ -1858,8 +1863,11 @@ const storage_corr = multer.diskStorage({
   const fileMan = req.files[0].filename;
   const datoEnMinusculas = fileMan.toLowerCase();
   const datos = req.body;
+
+  const user= datos.varT==='2'?datos.usuario:datos.usuario2
+  
   const sql= `UPDATE inc_registro_detalle  SET inc_det_estado = 3, inc_obs='${datos.mant_obs}', inc_fec_cierre_real = '${moment().format('YYYY-MM-DD HH:mm')}'
-              WHERE id = ${datos.id}  
+              WHERE id = ${datos.id} 
   
   `;
 
@@ -1873,7 +1881,7 @@ const storage_corr = multer.diskStorage({
   conector.query(sql, (error,result)=>{
     if(error) throw error;        
     res.status(200).json({result})
-    
+    setLog(datos.idCab, datos.id, user, datos.mant_obs)
     
     insertarArchIncidenteDet(datos.id, req.files)
   })
