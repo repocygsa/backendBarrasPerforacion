@@ -507,7 +507,7 @@ router.post("/getEmpresa", (req, res) => {
   
   });
   
-  
+
 
   router.post('/getContratosEmpresa',(req,res)=>{
   
@@ -555,7 +555,7 @@ router.post("/getEmpresa", (req, res) => {
     gobm.inc_registro_tranversal.fk_tran_jerarquia,
     gobm.hal_seg_jerarquia.nom AS jerarquia,
     gobm.inc_registro_tranversal.inc_tran_user,
-    tofitobd.dotacioncc.Nombre,
+    tofitobd.DotacionCC.Nombre,
     DATEDIFF(NOW(), gobm.inc_registro_tranversal.inc_fec_cierre) AS dias_diferencia,
     gobm.tbl_empre.nom_empre 
   FROM
@@ -563,7 +563,7 @@ router.post("/getEmpresa", (req, res) => {
     INNER JOIN gobm.tbl_ctto ON gobm.inc_registro_tranversal.fk_ctto = gobm.tbl_ctto.num_ctto
     INNER JOIN gobm.inc_registro_detalle ON gobm.inc_registro_tranversal.fk_id_incidente_detalle = gobm.inc_registro_detalle.id
     INNER JOIN gobm.hal_seg_jerarquia ON gobm.inc_registro_tranversal.fk_tran_jerarquia = gobm.hal_seg_jerarquia.id
-    INNER JOIN tofitobd.dotacioncc ON gobm.inc_registro_tranversal.fk_rut_responsable = tofitobd.dotacioncc.Rut
+    INNER JOIN tofitobd.DotacionCC ON gobm.inc_registro_tranversal.fk_rut_responsable = tofitobd.DotacionCC.Rut
     INNER JOIN gobm.tbl_empre ON gobm.tbl_ctto.emp_ctto = gobm.tbl_empre.rut_empre
     `;
     conector.query(sql, [empre], (error,result)=>{
@@ -1456,7 +1456,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
           tbl_ctto.emp_ctto,
           tbl_ctto.nom_ctto,
           tbl_empre.nom_empre,
-          tofitobd.dotacioncc.Nombre,
+          tofitobd.DotacionCC.Nombre,
           (
             SELECT COUNT(*)
             FROM inc_registro_detalle
@@ -1485,7 +1485,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
           tbl_ctto ON inc_cst_contratos.fk_cst_ctto = tbl_ctto.num_ctto
         INNER JOIN
           tbl_empre ON tbl_ctto.emp_ctto = tbl_empre.rut_empre
-          INNER JOIN tofitobd.dotacioncc ON gobm.inc_cst_contratos.fk_cst_rut = tofitobd.dotacioncc.Rut 
+          INNER JOIN tofitobd.DotacionCC ON gobm.inc_cst_contratos.fk_cst_rut = tofitobd.DotacionCC.Rut 
         WHERE inc_cst_contratos.id > 0
         
           ${bCst}
@@ -1528,14 +1528,14 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
               ( SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto AND fk_id_incidente = idCab AND inc_complementada = 3 ) AS count_complementada_3,
               ( SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto AND fk_id_incidente = idCab AND inc_complementada = 2 ) AS count_complementada_2,
               ( SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto AND fk_id_incidente = idCab AND inc_complementada = 2 AND inc_det_estado = 3 ) AS count_cerradas,
-              tofitobd.dotacioncc.Nombre,
+              tofitobd.DotacionCC.Nombre,
               CONCAT(gobm.inc_registro.id, '_', gobm.inc_cst_contratos.fk_cst_rut,'_',gobm.inc_cst_contratos.fk_cst_ctto) AS idGrid
             FROM
               gobm.inc_registro,
               gobm.inc_cst_contratos
               INNER JOIN gobm.tbl_ctto ON inc_cst_contratos.fk_cst_ctto = tbl_ctto.num_ctto
               INNER JOIN gobm.tbl_empre ON tbl_ctto.emp_ctto = tbl_empre.rut_empre
-              INNER JOIN tofitobd.dotacioncc ON gobm.inc_cst_contratos.fk_cst_rut = tofitobd.dotacioncc.Rut 
+              INNER JOIN tofitobd.DotacionCC ON gobm.inc_cst_contratos.fk_cst_rut = tofitobd.DotacionCC.Rut 
            WHERE  gobm.inc_cst_contratos.id > 0
            
            ${bEmpresa}
