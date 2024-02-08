@@ -294,7 +294,7 @@ router.post("/getIncidentesCount", (req, res) => {
   COUNT(CASE WHEN DATEDIFF(NOW(), inc_det_fecha_cierre) > 0 AND inc_det_estado =2 THEN 1 END) AS atrasado,
   COUNT(CASE WHEN DATEDIFF(NOW(), inc_det_fecha_cierre) < 1 AND inc_det_estado =1 THEN 1 END) AS proceso,
   COUNT(CASE WHEN inc_det_estado = 3 THEN 1 END) AS cerrado,
-	COUNT(CASE WHEN inc_complementada = 2 AND inc_det_estado in(1,2) THEN 1 END) AS complementado,
+	COUNT(CASE WHEN inc_complementada in(1,2) AND inc_det_estado in(1,2) THEN 1 END) AS complementado,
 	COUNT(CASE WHEN inc_complementada = 1 THEN 1 END) AS sinComplementar,
 	COUNT(CASE WHEN inc_complementada = 3 AND inc_det_estado IS NULL THEN 1 END) AS noAplica
 	
