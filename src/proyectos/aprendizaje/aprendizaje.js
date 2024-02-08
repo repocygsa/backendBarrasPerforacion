@@ -250,6 +250,7 @@ router.post("/getIncidentesTran", (req, res) => {
   grd.fk_id_incidente, 
   grd.inc_obs, 
   grd.inc_complementada, 
+  grd.fk_jerarquia,
   DATEDIFF(NOW(), grd.inc_det_fecha_cierre) AS dias_diferencia,
   dotacion.Nombre,
   (
@@ -282,6 +283,104 @@ ORDER BY  grd.fk_id_incidente ASC
 
     res.status(200).json({ result});
   });
+});
+
+
+router.post("/getIncidentesCount", (req, res) => {
+
+  const sql = `
+  SELECT
+  COUNT(*) AS total_registros,
+  COUNT(CASE WHEN DATEDIFF(NOW(), inc_det_fecha_cierre) > 0 AND inc_det_estado =2 THEN 1 END) AS atrasado,
+  COUNT(CASE WHEN DATEDIFF(NOW(), inc_det_fecha_cierre) < 1 AND inc_det_estado =1 THEN 1 END) AS proceso,
+  COUNT(CASE WHEN inc_det_estado = 3 THEN 1 END) AS cerrado,
+	COUNT(CASE WHEN inc_complementada = 2 AND inc_det_estado in(1,2) THEN 1 END) AS complementado,
+	COUNT(CASE WHEN inc_complementada = 1 THEN 1 END) AS sinComplementar,
+	COUNT(CASE WHEN inc_complementada = 3 AND inc_det_estado IS NULL THEN 1 END) AS noAplica
+	
+FROM
+  gobm.inc_registro_detalle;
+  `;
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+    res.status(200).json({ result });
+  });
+
+});
+
+
+router.post("/getIncidentesCountSC", (req, res) => {
+
+  const sql = `
+  SELECT SUM(suma_resultados) AS suma_total_resultados
+  FROM (
+      SELECT
+          gobm.inc_registro.id AS idCab,
+          (
+              SELECT COUNT(*) 
+              FROM inc_registro_detalle 
+              WHERE fk_id_incidente = idCab AND fk_ctto IS NULL
+          ) AS count_id_1,
+          (
+              SELECT COUNT(*) 
+              FROM inc_registro_detalle 
+              WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
+              AND fk_id_incidente = idCab 
+              AND inc_complementada = 3
+          ) AS count_complementada_3,
+          (
+              SELECT COUNT(*) 
+              FROM inc_registro_detalle 
+              WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
+              AND fk_id_incidente = idCab 
+              AND inc_complementada = 2
+          ) AS count_complementada_2,
+          (
+              SELECT COUNT(*) 
+              FROM inc_registro_detalle 
+              WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
+              AND fk_id_incidente = idCab 
+              AND inc_complementada = 2 
+              AND inc_det_estado = 3
+          ) AS count_cerradas,
+          (
+              SELECT COUNT(*) 
+              FROM inc_registro_detalle 
+              WHERE fk_id_incidente = idCab 
+              AND fk_ctto IS NULL
+          ) - (
+              (
+                  SELECT COUNT(*) 
+                  FROM inc_registro_detalle 
+                  WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
+                  AND fk_id_incidente = idCab 
+                  AND inc_complementada = 2
+              ) + (
+                  SELECT COUNT(*) 
+                  FROM inc_registro_detalle 
+                  WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
+                  AND fk_id_incidente = idCab 
+                  AND inc_complementada = 3
+              )
+          ) AS suma_resultados
+      FROM
+          gobm.inc_registro,
+          gobm.inc_cst_contratos
+      WHERE  
+          gobm.inc_cst_contratos.id > 0
+      AND
+          gobm.inc_cst_contratos.fk_cst_rut='15.106.378-0'
+  ) AS subconsulta;
+  
+  
+  
+             
+  `;
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+    res.status(200).json({ result });
+  });
+
 });
 
 router.post("/getIncidentesArchDet", (req, res) => {
@@ -578,8 +677,11 @@ router.post("/getEmpresa", (req, res) => {
 
 
     router.post('/getTranversal',(req,res)=>{
-  
-      const empre = req.body.datos;
+  console.log(req.body.data)
+      const estado = req.body.data;
+      const condicion =estado > 0?`AND gobm.inc_registro_detalle.inc_det_estado =${estado}`:''
+    
+
     
       sql = `
       SELECT
@@ -606,8 +708,9 @@ router.post("/getEmpresa", (req, res) => {
         INNER JOIN gobm.hal_seg_jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = gobm.hal_seg_jerarquia.id
         INNER JOIN gobm.tbl_empre ON gobm.tbl_ctto.emp_ctto = gobm.tbl_empre.rut_empre
       WHERE fk_ctto IS NOT NULL
+      ${condicion}
       `;
-      conector.query(sql, [empre], (error,result)=>{
+      conector.query(sql, (error,result)=>{
         if(error) throw error;        
         res.status(200).json({result})
       })
@@ -1532,6 +1635,9 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
               ( SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto AND fk_id_incidente = idCab AND inc_complementada = 3 ) AS count_complementada_3,
               ( SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto AND fk_id_incidente = idCab AND inc_complementada = 2 ) AS count_complementada_2,
               ( SELECT COUNT(*) FROM inc_registro_detalle WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto AND fk_id_incidente = idCab AND inc_complementada = 2 AND inc_det_estado = 3 ) AS count_cerradas,
+
+
+
               tofitobd.DotacionCC.Nombre,
               CONCAT(gobm.inc_registro.id, '_', gobm.inc_cst_contratos.fk_cst_rut,'_',gobm.inc_cst_contratos.fk_cst_ctto) AS idGrid
             FROM
