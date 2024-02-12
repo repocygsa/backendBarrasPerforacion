@@ -680,36 +680,37 @@ router.post("/getEmpresa", (req, res) => {
   console.log(req.body.data)
       const estado = req.body.data;
       const condicion =estado > 0?`AND gobm.inc_registro_detalle.inc_det_estado =${estado}`:''
+      const condConsulta =estado > 0?'':`AND fk_ctto IS NOT NULL`
     
 
     
       sql = `
       SELECT
-      gobm.inc_registro_detalle.id, 
-      gobm.inc_registro_detalle.inc_det_fecha_cierre, 
-      gobm.inc_registro_detalle.inc_med_correctiva, 
-      gobm.inc_registro_detalle.inc_rut_responsable, 
-      gobm.inc_registro_detalle.inc_det_estado, 
-      gobm.inc_registro_detalle.inc_fec_cierre_real, 
-      gobm.inc_registro_detalle.fk_id_incidente, 
-      gobm.inc_registro_detalle.inc_obs, 
-      gobm.inc_registro_detalle.fk_ctto, 
+      gobm.inc_registro_detalle.id,
+      gobm.inc_registro_detalle.inc_det_fecha_cierre,
+      gobm.inc_registro_detalle.inc_med_correctiva,
+      gobm.inc_registro_detalle.inc_rut_responsable,
+      gobm.inc_registro_detalle.inc_det_estado,
+      gobm.inc_registro_detalle.inc_fec_cierre_real,
+      gobm.inc_registro_detalle.fk_id_incidente,
+      gobm.inc_registro_detalle.inc_obs,
+      gobm.inc_registro_detalle.fk_ctto,
       gobm.hal_seg_jerarquia.nom AS jerarquia,
       gobm.tbl_empre.nom_empre,
-      DATEDIFF(NOW(), gobm.inc_registro_detalle.inc_det_fecha_cierre) AS dias_diferencia,
-      tofitobd.DotacionCC.Nombre
+      DATEDIFF( NOW(), gobm.inc_registro_detalle.inc_det_fecha_cierre ) AS dias_diferencia,
+      tofitobd.DotacionCC.Nombre 
     FROM
       gobm.inc_registro_detalle
-      INNER JOIN
-      tofitobd.DotacionCC
-      ON 
-        gobm.inc_registro_detalle.inc_rut_responsable = tofitobd.DotacionCC.Rut
-        INNER JOIN gobm.tbl_ctto ON gobm.inc_registro_detalle.fk_ctto = gobm.tbl_ctto.num_ctto
-        INNER JOIN gobm.hal_seg_jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = gobm.hal_seg_jerarquia.id
-        INNER JOIN gobm.tbl_empre ON gobm.tbl_ctto.emp_ctto = gobm.tbl_empre.rut_empre
-      WHERE fk_ctto IS NOT NULL
+      INNER JOIN tofitobd.DotacionCC ON gobm.inc_registro_detalle.inc_rut_responsable = tofitobd.DotacionCC.Rut
+      LEFT JOIN gobm.tbl_ctto ON gobm.inc_registro_detalle.fk_ctto = gobm.tbl_ctto.num_ctto
+      INNER JOIN gobm.hal_seg_jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = gobm.hal_seg_jerarquia.id
+      LEFT JOIN gobm.tbl_empre ON gobm.tbl_ctto.emp_ctto = gobm.tbl_empre.rut_empre 
+    WHERE
+      gobm.inc_registro_detalle.id > 0
       ${condicion}
+      ${condConsulta}
       `;
+     
       conector.query(sql, (error,result)=>{
         if(error) throw error;        
         res.status(200).json({result})
