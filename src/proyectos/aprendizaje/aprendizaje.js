@@ -1898,18 +1898,18 @@ const fileInf = req.files.files_inf[0].originalname;
 
    
     if(error) throw error;   
-    res.status(200).json({result})
+    
     // const accCorrectivaHTML = generarListaHTML(arregloDeObjetos);
     // const accCorreos =generarListaCorreo(valCorreo);
   
     insertarDetalleIncidente(result.insertId, arregloDeObjetos)
     insertarArchIncidente(result.insertId, req.files.files_inf)
-
     generaFoto(result.insertId);
-
+    res.status(200).json({result})
+/*
     setTimeout(() => {
       envioCorreo();
-    }, "20000");
+    }, "20000"); */
 
      
      // envioFlashSeguridad(result.insertId, valores, accCorrectivaHTML, valores.tipoIncidenteDesc, valores.empreDesc, fileImg, valores.calificaIncidenteDesc, accCorreos )
