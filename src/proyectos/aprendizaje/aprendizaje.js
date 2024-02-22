@@ -18,6 +18,7 @@ const fs = require("fs");
 const utf8 = require("utf8");
 
 const generarImages = require('../../puppeteer/generarImg');
+const generarImagesStatus = require('../../puppeteer/generarImgStatus');
 
 
  router.post("/getPermisoSessionAprendizaje", (req, res) => {
@@ -286,6 +287,50 @@ ORDER BY  grd.fk_id_incidente ASC
 });
 
 
+router.post("/getIncidentesTranCorr", (req, res) => {
+
+  const sql = `
+  SELECT
+	gobm.inc_cst_contratos.fk_cst_ctto,
+	gobm.inc_cst_contratos.fk_cst_rut,
+	gobm.inc_registro.fk_ctto AS ctto_cab,
+	gobm.inc_registro_detalle.inc_det_fecha_cierre,
+	gobm.inc_registro_detalle.inc_med_correctiva,
+	gobm.inc_registro_detalle.inc_rut_responsable,
+	gobm.inc_registro_detalle.fk_jerarquia,
+	gobm.inc_registro_detalle.inc_det_user,
+	gobm.inc_registro_detalle.fk_ctto,
+	gobm.inc_registro_detalle.inc_complementada,
+	gobm.inc_registro_detalle.inc_det_id_comp,
+	gobm.inc_registro.inc_crea,
+	gobm.inc_registro.inc_fecha_hora_registro,
+	tofitobd.dotacioncc.Nombre,
+	gobm.inc_registro_detalle.id,
+	gobm.inc_registro_detalle.fk_id_incidente,
+	gobm.inc_registro.fk_emp AS emp_cab,
+	gobm.tbl_empre.nom_empre,
+	jerarquia.nom 
+FROM
+	gobm.inc_cst_contratos,
+	gobm.inc_registro
+	INNER JOIN gobm.inc_registro_detalle ON gobm.inc_registro.id = gobm.inc_registro_detalle.fk_id_incidente
+	INNER JOIN tofitobd.dotacioncc ON gobm.inc_registro.inc_crea = tofitobd.dotacioncc.Rut
+	INNER JOIN gobm.tbl_empre ON gobm.inc_registro.fk_emp = gobm.tbl_empre.rut_empre
+	INNER JOIN gobm.hal_seg_jerarquia AS jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = jerarquia.id 
+WHERE
+	gobm.inc_registro_detalle.fk_ctto IS NULL 
+	AND gobm.inc_cst_contratos.fk_cst_ctto <> gobm.inc_registro.fk_ctto 
+ORDER BY
+	gobm.inc_registro.inc_fecha_hora_registro ASC
+  `;
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+    res.status(200).json({ result });
+  });
+
+});
+
+
 router.post("/getIncidentesCount", (req, res) => {
 
   const sql = `
@@ -311,71 +356,27 @@ FROM
 
 router.post("/getIncidentesCountSC", (req, res) => {
 
-  const sql = `
-  SELECT SUM(suma_resultados) AS suma_total_resultados
-  FROM (
-      SELECT
-          gobm.inc_registro.id AS idCab,
-          (
-              SELECT COUNT(*) 
-              FROM inc_registro_detalle 
-              WHERE fk_id_incidente = idCab AND fk_ctto IS NULL
-          ) AS count_id_1,
-          (
-              SELECT COUNT(*) 
-              FROM inc_registro_detalle 
-              WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
-              AND fk_id_incidente = idCab 
-              AND inc_complementada = 3
-          ) AS count_complementada_3,
-          (
-              SELECT COUNT(*) 
-              FROM inc_registro_detalle 
-              WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
-              AND fk_id_incidente = idCab 
-              AND inc_complementada = 2
-          ) AS count_complementada_2,
-          (
-              SELECT COUNT(*) 
-              FROM inc_registro_detalle 
-              WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
-              AND fk_id_incidente = idCab 
-              AND inc_complementada = 2 
-              AND inc_det_estado = 3
-          ) AS count_cerradas,
-          (
-              SELECT COUNT(*) 
-              FROM inc_registro_detalle 
-              WHERE fk_id_incidente = idCab 
-              AND fk_ctto IS NULL
-          ) - (
-              (
-                  SELECT COUNT(*) 
-                  FROM inc_registro_detalle 
-                  WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
-                  AND fk_id_incidente = idCab 
-                  AND inc_complementada = 2
-              ) + (
-                  SELECT COUNT(*) 
-                  FROM inc_registro_detalle 
-                  WHERE fk_ctto = inc_cst_contratos.fk_cst_ctto 
-                  AND fk_id_incidente = idCab 
-                  AND inc_complementada = 3
-              )
-          ) AS suma_resultados
-      FROM
-          gobm.inc_registro,
-          gobm.inc_cst_contratos
-      WHERE  
-          gobm.inc_cst_contratos.id > 0
-      AND
-          gobm.inc_cst_contratos.fk_cst_rut='15.106.378-0'
-  ) AS subconsulta;
+  condicionUsu= `AND gobm.inc_cst_contratos.fk_cst_rut='15.106.378-0'`
+
+ 
+
+  const sql =`
   
+  SELECT COUNT(*) AS suma_total_resultados
+  FROM
+      gobm.inc_cst_contratos,
+      gobm.inc_registro
+          INNER JOIN gobm.inc_registro_detalle ON gobm.inc_registro.id = gobm.inc_registro_detalle.fk_id_incidente
+          INNER JOIN gobm.tbl_empre ON gobm.inc_registro.fk_emp = gobm.tbl_empre.rut_empre
+          INNER JOIN gobm.hal_seg_jerarquia AS jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = jerarquia.id 
+  WHERE
+      gobm.inc_registro_detalle.fk_ctto IS NULL 
+      AND gobm.inc_cst_contratos.fk_cst_ctto <> gobm.inc_registro.fk_ctto;
   
-  
-             
-  `;
+
+  `
+
+
   conector.query(sql, (err, result) => {
     if (err) throw err;
     res.status(200).json({ result });
@@ -698,17 +699,23 @@ router.post("/getEmpresa", (req, res) => {
       gobm.hal_seg_jerarquia.nom AS jerarquia,
       gobm.tbl_empre.nom_empre,
       DATEDIFF( NOW(), gobm.inc_registro_detalle.inc_det_fecha_cierre ) AS dias_diferencia,
-      tofitobd.DotacionCC.Nombre 
+      tofitobd.DotacionCC.Nombre,
+      gobm.inc_registro.fk_ctto AS cttoCab,
+      empreCab.nom_empre AS nomEmpreCab 
     FROM
       gobm.inc_registro_detalle
       INNER JOIN tofitobd.DotacionCC ON gobm.inc_registro_detalle.inc_rut_responsable = tofitobd.DotacionCC.Rut
       LEFT JOIN gobm.tbl_ctto ON gobm.inc_registro_detalle.fk_ctto = gobm.tbl_ctto.num_ctto
       INNER JOIN gobm.hal_seg_jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = gobm.hal_seg_jerarquia.id
-      LEFT JOIN gobm.tbl_empre ON gobm.tbl_ctto.emp_ctto = gobm.tbl_empre.rut_empre 
+      LEFT JOIN gobm.tbl_empre ON gobm.tbl_ctto.emp_ctto = gobm.tbl_empre.rut_empre
+      INNER JOIN gobm.inc_registro ON gobm.inc_registro_detalle.fk_id_incidente = gobm.inc_registro.id
+      INNER JOIN gobm.tbl_empre AS empreCab ON gobm.inc_registro.fk_emp = empreCab.rut_empre
     WHERE
       gobm.inc_registro_detalle.id > 0
       ${condicion}
       ${condConsulta}
+      ORDER BY
+	gobm.inc_registro_detalle.inc_det_fecha_cierre ASC
       `;
      
       conector.query(sql, (error,result)=>{
@@ -1275,7 +1282,21 @@ const buscarCorreos=()=>{
     let sql=`
     SELECT correo 
     FROM inc_correos
-    WHERE est = 1
+    WHERE tipo = 1
+    `
+    conector.query(sql, (err, result) => {
+      if (err) throw err;
+        res(result)
+    });
+  })
+}
+
+const buscarCorreosCCT=()=>{
+  return new Promise(res=>{
+    let sql=`
+    SELECT correo 
+    FROM inc_correos
+    WHERE tipo = 2
     `
     conector.query(sql, (err, result) => {
       if (err) throw err;
@@ -1290,7 +1311,7 @@ const envioCorreo = async()=>{
   let attachments = [
     {
       filename: 'reporte.png',
-      path: `${process.env.PATH_DOCUMENT_APE}/reportes/reporte.png`,
+      path: `${process.env.PATH_DOCUMENT_APE}/reporteStatus/reporteStatus.png`,
       cid: "reporte",
     }
   ]
@@ -1298,6 +1319,32 @@ const envioCorreo = async()=>{
   const plantilla = planti.setBody()
 
   const correosAEnviar = await buscarCorreos()
+  let listaCorreos=[]  // acá se almacenan los correos de los administradores para ser enviados
+
+  correoVerificacion = 'randr014@contratistas.codelco.cl'
+
+  correosAEnviar.map(correoReporte=>{
+    listaCorreos.push(correoReporte.correo)
+  })
+
+  newMailer.enviarCorreo(correoVerificacion, listaCorreos,'Aprendizaje de incidente GOM', plantilla, attachments)
+
+};
+
+
+const envioCorreoCCT = async()=>{
+
+  let attachments = [
+    {
+      filename: 'reporte.png',
+      path: `${process.env.PATH_DOCUMENT_APE}/reporteStatus/reporteStatus.png`,
+      cid: "reporte",
+    }
+  ]
+
+  const plantilla = planti.setBody()
+
+  const correosAEnviar = await buscarCorreosCCT()
   let listaCorreos=[]  // acá se almacenan los correos de los administradores para ser enviados
 
   correoVerificacion = 'randr014@contratistas.codelco.cl'
@@ -1552,6 +1599,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
      
       const rut = req.body.data.usuario
       const id = req.body.data.idCab ?req.body.data.idCab:2
+      const emprePadre=req.body.data.emprePadre?req.body.data.emprePadre:1
     
     
       bCst=rut?`AND inc_cst_contratos.fk_cst_rut = '${rut}'`:''
@@ -1594,7 +1642,7 @@ const insertarArchIncidenteDet=(insertId, valArch)=>{
         INNER JOIN
           tbl_empre ON tbl_ctto.emp_ctto = tbl_empre.rut_empre
           INNER JOIN tofitobd.DotacionCC ON gobm.inc_cst_contratos.fk_cst_rut = tofitobd.DotacionCC.Rut 
-        WHERE inc_cst_contratos.id > 0
+        WHERE inc_cst_contratos.fk_cst_ctto <> '${emprePadre}'
         
           ${bCst}
           `
@@ -2066,6 +2114,63 @@ const generaFoto=async(insertId)=>{
   fs.writeFileSync("./reportes/reporte.png", imageBuffer);
 
 };
+
+const generaFotoStatus=async()=>{
+
+  const imageBuffer = await generarImages({
+    url : `${process.env.DOMINIO}/web/accionesCorrectivas/CorreoDetalleAcciones`
+  })
+ 
+  fs.writeFileSync("./reporteStatus/reporteStatus.png", imageBuffer);
+
+};
+
+router.post('/generaFotoStatus', async (req, res) => {
+  console.log('genera foro status')
+  try {
+    const imageBuffer = await generarImagesStatus({
+      url: `${process.env.DOMINIO}/web/accionesCorrectivas/CorreoDetalleAcciones`
+    });
+
+    fs.writeFileSync("./reporteStatus/reporteStatus.png", imageBuffer);
+
+    res.status(200).json({ message: 'Reporte generado exitosamente.' });
+   
+   
+    setTimeout(() => {
+      envioCorreo();
+    }, "20000"); 
+
+  } catch (error) {
+    console.error('Error al generar el reporte:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+router.post('/generaFotoStatusCCT', async (req, res) => {
+  console.log('genera foro status')
+  try {
+    const imageBuffer = await generarImagesStatus({
+      url: `${process.env.DOMINIO}/web/accionesCorrectivas/CorreoDetalleAcciones`
+    });
+
+    fs.writeFileSync("./reporteStatus/reporteStatus.png", imageBuffer);
+
+    res.status(200).json({ message: 'Reporte generado exitosamente.' });
+   
+   
+    setTimeout(() => {
+      envioCorreoCCT();
+    }, "20000"); 
+
+  } catch (error) {
+    console.error('Error al generar el reporte:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+
+
 
 
 module.exports = router;

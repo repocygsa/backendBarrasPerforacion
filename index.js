@@ -30,5 +30,13 @@ app.use(cors({origin:"*"}));
 
 //epp
 app.use('/aprendizaje',epp);
-
-
+/*
+const cron = require('node-cron');
+// Correo dias lunes aprendizaje '0 7 * * 1 '
+cron.schedule('* 11 * 2 4 ', () => {
+  console.log('envio de correo 12:00')
+ },{
+ scheduled: true,
+ timezone: "America/Santiago"
+ });
+*/

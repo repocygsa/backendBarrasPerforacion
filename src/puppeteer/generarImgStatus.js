@@ -1,13 +1,13 @@
 const puppeteer = require('puppeteer');
 
-const generarImages = async({url})=>{
+const generarImagesStatus = async({url})=>{
  
     const browser = await puppeteer.launch({
  //     executablePath: '/usr/bin/chromium-browser',
       headless:'new',
       defaultViewport:{
-          width:876,
-          height:1500,
+          width:1366,
+          height:1800,
           deviceScaleFactor:1,
           isMobile:true,
           hasTouch:false,
@@ -32,4 +32,4 @@ const generarImages = async({url})=>{
 
 }
 
-module.exports = generarImages;
+module.exports = generarImagesStatus;
