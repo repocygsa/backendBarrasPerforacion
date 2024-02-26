@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const generarImagesStatus = async({url})=>{
  
     const browser = await puppeteer.launch({
- //     executablePath: '/usr/bin/chromium-browser',
+      executablePath: '/usr/bin/chromium-browser',
       headless:'new',
       defaultViewport:{
           width:1366,

@@ -289,7 +289,7 @@ ORDER BY  grd.fk_id_incidente ASC
 
 router.post("/getIncidentesTranCorr", (req, res) => {
 
-  const sql = `
+  const sql2 = `
   SELECT
 	gobm.inc_cst_contratos.fk_cst_ctto,
 	gobm.inc_cst_contratos.fk_cst_rut,
@@ -304,7 +304,7 @@ router.post("/getIncidentesTranCorr", (req, res) => {
 	gobm.inc_registro_detalle.inc_det_id_comp,
 	gobm.inc_registro.inc_crea,
 	gobm.inc_registro.inc_fecha_hora_registro,
-	tofitobd.dotacioncc.Nombre,
+	tofitobd.DotacionCC.Nombre,
 	gobm.inc_registro_detalle.id,
 	gobm.inc_registro_detalle.fk_id_incidente,
 	gobm.inc_registro.fk_emp AS emp_cab,
@@ -314,7 +314,7 @@ FROM
 	gobm.inc_cst_contratos,
 	gobm.inc_registro
 	INNER JOIN gobm.inc_registro_detalle ON gobm.inc_registro.id = gobm.inc_registro_detalle.fk_id_incidente
-	INNER JOIN tofitobd.dotacioncc ON gobm.inc_registro.inc_crea = tofitobd.dotacioncc.Rut
+	INNER JOIN tofitobd.DotacionCC ON gobm.inc_registro.inc_crea = tofitobd.DotacionCC.Rut
 	INNER JOIN gobm.tbl_empre ON gobm.inc_registro.fk_emp = gobm.tbl_empre.rut_empre
 	INNER JOIN gobm.hal_seg_jerarquia AS jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = jerarquia.id 
 WHERE
@@ -323,6 +323,44 @@ WHERE
 ORDER BY
 	gobm.inc_registro.inc_fecha_hora_registro ASC
   `;
+
+  const sql = `
+  SELECT
+	inc_cct.fk_cst_ctto,
+	tbl_empre.nom_empre,
+	(
+	SELECT
+		COUNT(*) 
+	FROM
+		gobm.inc_cst_contratos,
+		gobm.inc_registro
+		INNER JOIN gobm.inc_registro_detalle ON gobm.inc_registro.id = gobm.inc_registro_detalle.fk_id_incidente
+		INNER JOIN gobm.tbl_empre ON gobm.inc_registro.fk_emp = gobm.tbl_empre.rut_empre
+		INNER JOIN gobm.hal_seg_jerarquia AS jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = jerarquia.id 
+	WHERE
+		gobm.inc_registro_detalle.fk_ctto IS NULL 
+		AND gobm.inc_cst_contratos.fk_cst_ctto <> gobm.inc_registro.fk_ctto 
+		AND gobm.inc_cst_contratos.fk_cst_ctto = gobm.inc_cct.fk_cst_ctto 
+	) AS medidas_sc,
+	(
+	SELECT
+		GROUP_CONCAT( tofitobd.DotacionCC.Nombre SEPARATOR ',  ' ) 
+	FROM
+		tofitobd.DotacionCC
+		INNER JOIN inc_cst_contratos ON tofitobd.DotacionCC.Rut = inc_cst_contratos.fk_cst_rut 
+	WHERE
+		gobm.inc_cst_contratos.fk_cst_ctto = gobm.inc_cct.fk_cst_ctto 
+	) AS cct_nom 
+FROM
+	tbl_ctto
+	INNER JOIN tbl_empre ON tbl_ctto.emp_ctto = tbl_empre.rut_empre
+	INNER JOIN inc_cst_contratos AS inc_cct ON inc_cct.fk_cst_ctto = tbl_ctto.num_ctto 
+GROUP BY
+	inc_cct.fk_cst_ctto
+  `
+
+
+
   conector.query(sql, (err, result) => {
     if (err) throw err;
     res.status(200).json({ result });
@@ -678,10 +716,10 @@ router.post("/getEmpresa", (req, res) => {
 
 
     router.post('/getTranversal',(req,res)=>{
-  console.log(req.body.data)
+
       const estado = req.body.data;
       const condicion =estado > 0?`AND gobm.inc_registro_detalle.inc_det_estado =${estado}`:''
-      const condConsulta =estado > 0?'':`AND fk_ctto IS NOT NULL`
+      const condConsulta =estado > 0?'':''  //`AND gobm.inc_registro_detalle.fk_ctto IS NOT NULL`
     
 
     
@@ -717,7 +755,7 @@ router.post("/getEmpresa", (req, res) => {
       ORDER BY
 	gobm.inc_registro_detalle.inc_det_fecha_cierre ASC
       `;
-     
+ 
       conector.query(sql, (error,result)=>{
         if(error) throw error;        
         res.status(200).json({result})
@@ -1281,8 +1319,8 @@ const buscarCorreos=()=>{
   return new Promise(res=>{
     let sql=`
     SELECT correo 
-    FROM inc_correos
-    WHERE tipo = 1
+    FROM inc_correo_status
+    WHERE estado = 1
     `
     conector.query(sql, (err, result) => {
       if (err) throw err;
@@ -1327,7 +1365,7 @@ const envioCorreo = async()=>{
     listaCorreos.push(correoReporte.correo)
   })
 
-  newMailer.enviarCorreo(correoVerificacion, listaCorreos,'Aprendizaje de incidente GOM', plantilla, attachments)
+  newMailer.enviarCorreo(correoVerificacion, listaCorreos,'Estatus general acciones correctivas GOM ', plantilla, attachments)
 
 };
 
@@ -2115,18 +2153,32 @@ const generaFoto=async(insertId)=>{
 
 };
 
-const generaFotoStatus=async()=>{
+const generaFotoStatusAdm=async()=>{
 
-  const imageBuffer = await generarImages({
-    url : `${process.env.DOMINIO}/web/accionesCorrectivas/CorreoDetalleAcciones`
-  })
  
-  fs.writeFileSync("./reporteStatus/reporteStatus.png", imageBuffer);
+  try {
+    const imageBuffer = await generarImagesStatus({
+      url: `${process.env.DOMINIO}/web/accionesCorrectivas/CorreoDetalleAcciones`
+    });
+
+    fs.writeFileSync("./reporteStatus/reporteStatus.png", imageBuffer);
+
+    res.status(200).json({ message: 'Reporte generado exitosamente.' });
+   
+   
+  /*  setTimeout(() => {
+      envioCorreo();
+    }, "20000"); */
+
+  } catch (error) {
+    console.error('Error al generar el reporte:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
 
 };
 
 router.post('/generaFotoStatus', async (req, res) => {
-  console.log('genera foro status')
+
   try {
     const imageBuffer = await generarImagesStatus({
       url: `${process.env.DOMINIO}/web/accionesCorrectivas/CorreoDetalleAcciones`
@@ -2148,7 +2200,7 @@ router.post('/generaFotoStatus', async (req, res) => {
 });
 
 router.post('/generaFotoStatusCCT', async (req, res) => {
-  console.log('genera foro status')
+ 
   try {
     const imageBuffer = await generarImagesStatus({
       url: `${process.env.DOMINIO}/web/accionesCorrectivas/CorreoDetalleAcciones`

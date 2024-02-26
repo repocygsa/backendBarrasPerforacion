@@ -30,13 +30,14 @@ app.use(cors({origin:"*"}));
 
 //epp
 app.use('/aprendizaje',epp);
-/*
+
 const cron = require('node-cron');
+const {generaFotoStatusAdm} = require('./src/proyectos/aprendizaje/enviarStatus');
 // Correo dias lunes aprendizaje '0 7 * * 1 '
-cron.schedule('* 11 * 2 4 ', () => {
+cron.schedule('* 18 * 2 4 ', () => {
   console.log('envio de correo 12:00')
+  generaFotoStatusAdm()
  },{
  scheduled: true,
  timezone: "America/Santiago"
  });
-*/
