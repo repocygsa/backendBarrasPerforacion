@@ -7,7 +7,7 @@ const generarImagesStatus = async({url})=>{
       headless:'new',
       defaultViewport:{
           width:1366,
-          height:1800,
+          height:2300,
           deviceScaleFactor:1,
           isMobile:true,
           hasTouch:false,
