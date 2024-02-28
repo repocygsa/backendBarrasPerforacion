@@ -33,8 +33,11 @@ app.use('/aprendizaje',epp);
 
 const cron = require('node-cron');
 const {generaFotoStatusAdm} = require('./src/proyectos/aprendizaje/enviarStatus');
-// Correo dias lunes aprendizaje '0 7 * * 1 '
-cron.schedule('* 18 * 2 4 ', () => {
+
+
+
+// Correo dias lunes aprendizaje '0 8 * * 1 '
+cron.schedule('0 8 * * 1 ', () => {
   console.log('envio de correo 12:00')
   generaFotoStatusAdm()
  },{

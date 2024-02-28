@@ -472,6 +472,22 @@ FROM
   });
 });
 
+router.post("/cambiaEstado", (req, res) => {
+  
+ 
+  const sql =  `
+  UPDATE gobm.inc_registro_detalle
+  SET inc_det_estado = 2
+  WHERE inc_det_fecha_cierre < CURRENT_DATE AND inc_det_estado <3;
+`;
+
+conector.query(sql, (err, result) => {
+  if (err) throw err;
+  res.status(200).json({ result });
+});
+
+});
+
 router.post("/getIncidentes", (req, res) => {
 
   const empresa = req.body.data.emp_inf ? req.body.data.emp_inf : '0';
@@ -721,6 +737,7 @@ router.post("/getEmpresa", (req, res) => {
       const condicion =estado > 0?`AND gobm.inc_registro_detalle.inc_det_estado =${estado}`:''
       const condConsulta =estado > 0?'':''  //`AND gobm.inc_registro_detalle.fk_ctto IS NOT NULL`
     
+      
 
     
       sql = `
