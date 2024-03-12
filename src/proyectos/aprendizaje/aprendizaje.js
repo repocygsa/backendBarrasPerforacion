@@ -328,19 +328,18 @@ ORDER BY
   SELECT
 	inc_cct.fk_cst_ctto,
 	tbl_empre.nom_empre,
-	(
+		(
 	SELECT
-		COUNT(*) 
+		COUNT(DISTINCT gobm.inc_registro_detalle.id) 
 	FROM
 		gobm.inc_cst_contratos,
 		gobm.inc_registro
 		INNER JOIN gobm.inc_registro_detalle ON gobm.inc_registro.id = gobm.inc_registro_detalle.fk_id_incidente
-		INNER JOIN gobm.tbl_empre ON gobm.inc_registro.fk_emp = gobm.tbl_empre.rut_empre
-		INNER JOIN gobm.hal_seg_jerarquia AS jerarquia ON gobm.inc_registro_detalle.fk_jerarquia = jerarquia.id 
 	WHERE
 		gobm.inc_registro_detalle.fk_ctto IS NULL 
-		AND gobm.inc_cst_contratos.fk_cst_ctto <> gobm.inc_registro.fk_ctto 
+	  AND gobm.inc_cst_contratos.fk_cst_ctto <> gobm.inc_registro.fk_ctto 
 		AND gobm.inc_cst_contratos.fk_cst_ctto = gobm.inc_cct.fk_cst_ctto 
+	GROUP BY gobm.inc_cst_contratos.fk_cst_ctto
 	) AS medidas_sc,
 	(
 	SELECT
@@ -352,9 +351,10 @@ ORDER BY
 		gobm.inc_cst_contratos.fk_cst_ctto = gobm.inc_cct.fk_cst_ctto 
 	) AS cct_nom 
 FROM
-	tbl_ctto
-	INNER JOIN tbl_empre ON tbl_ctto.emp_ctto = tbl_empre.rut_empre
-	INNER JOIN inc_cst_contratos AS inc_cct ON inc_cct.fk_cst_ctto = tbl_ctto.num_ctto 
+	inc_cst_contratos AS inc_cct
+	INNER JOIN tbl_empre
+	INNER JOIN tbl_ctto ON tbl_empre.rut_empre = tbl_ctto.emp_ctto 
+	AND inc_cct.fk_cst_ctto = tbl_ctto.num_ctto 
 GROUP BY
 	inc_cct.fk_cst_ctto
   `
