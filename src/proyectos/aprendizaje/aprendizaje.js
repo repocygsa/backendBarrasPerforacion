@@ -28,7 +28,7 @@ const generarImagesStatus = require('../../puppeteer/generarImgStatus');
     rut = req.body.res.data.rut
   }
  
-  const sql = `select * from aprendizaje_usuarios where rut=?`;
+  const sql = `select * from inc_usuarios where rut=?`;
     conector.query(sql,[rut], (err, result) => {
     if (err) throw err;
       res.status(200).json({permiso:result,datosSesion});
