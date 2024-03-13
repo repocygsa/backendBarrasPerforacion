@@ -17,7 +17,7 @@ new socket()
 //Socket
 
 // Llamado Epp
-const epp = require('./src/proyectos/aprendizaje/aprendizaje')
+const epp = require('./src/proyectos/bdp/bdp')
 
 const port = 8060;
 app.listen(port, () => {
@@ -29,18 +29,6 @@ const whiteList = ['http://appsgobm.com','http://localhost:3000'];
 app.use(cors({origin:"*"}));
 
 //epp
-app.use('/aprendizaje',epp);
-
-const cron = require('node-cron');
-const {generaFotoStatusAdm} = require('./src/proyectos/aprendizaje/enviarStatus');
+app.use('/bdp',epp);
 
 
-
-// Correo dias lunes aprendizaje '0 8 * * 1 '
-cron.schedule('0 8 * * 1 ', () => {
-  console.log('envio de correo 12:00')
-  generaFotoStatusAdm()
- },{
- scheduled: true,
- timezone: "America/Santiago"
- });
