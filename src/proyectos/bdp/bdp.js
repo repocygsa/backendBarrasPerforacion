@@ -129,28 +129,34 @@ router.post("/getNivel", (req, res) => {
 
 });
 
-const traeUltimoID = (callback) => {
- 
-  const sql = `SELECT MAX(id) AS ultimo_id FROM bdp_registro`;
+const traeUltimoID = (ctto, callback) => {
 
+  const condicion = ctto?`AND fk_ctto = '${ctto}'`:''
+ 
+  const sql = `SELECT COUNT(id) AS ultimo_id FROM bdp_registro where id > 0 ${condicion}` ;
+console.log(sql)
   conector.query(
     sql,
     (err, result) => {
       if (err) throw err;
-      const ultimoID = result[0].ultimo_id || 1; // Si no se encuentra ningún resultado, devuelve un 1
+      const ultimoID = result[0].ultimo_id+1 || 1; // Si no se encuentra ningún resultado, devuelve un 1
       callback(ultimoID);
     }
   );
 };
 
 router.post("/guardarBdp", async (req, res) => {
+
+
+
   try {
+    const ctto = req.body.datos.ctt_inf;
     const id = await new Promise((resolve, reject) => {
-      traeUltimoID(resolve);
+      traeUltimoID(ctto, resolve);
     });
 
   
-    const cod_iden = `GOM-${req.body.datos.ctt_inf}-BP-${id===1?id:id+1}`;
+    const cod_iden = `GOM-${req.body.datos.ctt_inf}-BP-${id}`;
     console.log(cod_iden)
     const fecha = moment().format('YYYY-MM-DD HH:mm');
 
@@ -177,7 +183,93 @@ router.post("/guardarBdp", async (req, res) => {
   }
 });
 
+router.post("/getBDP", (req, res) => {
 
+  const sql = `
+  SELECT
+	gobm.bdp_registro.id,
+	gobm.bdp_registro.fk_empresa,
+	gobm.tbl_empre.nom_empre,
+	gobm.bdp_registro.fk_ctto,
+	gobm.bdp_registro.bdp_user,
+	gobm.bdp_registro.bdp_tipo_acero,
+	gobm.bdp_registro.bdp_marca,
+	gobm.bdp_registro.bdp_fecha_hora,
+	gobm.bdp_registro.bdp_cod_identificador,
+	tofitobd.dotacioncc.Nombre,
+	gobm.bdp_registro.fk_causa,
+	gobm.bdp_registro.fk_rut_responsable,
+	gobm.bdp_registro.bdp_obs,
+	gobm.bdp_registro.bdp_fec_hora_ret,
+	gobm.bdp_causal_retiro.bdp_causal,
+	dot_resp.Nombre AS nom_resp 
+FROM
+	gobm.tbl_empre
+	INNER JOIN gobm.bdp_registro ON gobm.bdp_registro.fk_empresa = gobm.tbl_empre.rut_empre
+	INNER JOIN tofitobd.dotacioncc ON gobm.bdp_registro.bdp_user = tofitobd.dotacioncc.Rut
+	LEFT JOIN gobm.bdp_causal_retiro ON gobm.bdp_registro.fk_causa = gobm.bdp_causal_retiro.id
+	LEFT JOIN tofitobd.dotacioncc AS dot_resp ON gobm.bdp_registro.fk_rut_responsable = dot_resp.Rut
+  `;
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+    res.status(200).json({ result });
+  });
 
+});
+
+router.post("/getCausal", (req, res) => {
+
+  const sql = `
+    SELECT
+    *
+    FROM
+    bdp_causal_retiro
+  `;
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+    res.status(200).json({ result });
+  });
+
+});
+
+router.post("/updBarra", (req, res) => {
+console.log(req.body)
+
+const causa= req.body.data.bpd_causa
+const rut= req.body.data.rut_usu
+const obs= req.body.data.bdp_obs
+const fec= moment().format('YYYY-MM-DD HH:mm')
+const id= req.body.data.id?req.body.data.id:0
+
+  const sql = `
+    UPDATE bdp_registro set fk_causa =${causa}, fk_rut_responsable ='${rut}', bdp_obs='${obs}', bdp_fec_hora_ret='${fec}'
+    WHERE id = ${id}
+  `;
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+    res.status(200).json({ result });
+  });
+});
+
+router.post("/getCtaCascos", (req, res) => {
+
+  const sql = `
+  SELECT
+  tofitobd.DotacionCC.Rut,
+  tofitobd.DotacionCC.Nombre,
+  tofitobd.DotacionCC.Gerencia,
+  tofitobd.DotacionCC.Empresa,
+  tofitobd.DotacionCC.Contrato,
+  tofitobd.DotacionCC.RutEmpresa 
+FROM
+  tofitobd.DotacionCC
+
+  `;
+  conector.query(sql, (err, result) => {
+    if (err) throw err;
+    res.status(200).json({ result });
+  });
+
+});
 
 module.exports = router;
