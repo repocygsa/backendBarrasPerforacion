@@ -6,7 +6,7 @@ const moment = require("moment");
 class Socket{
     constructor(){
        
-        this.io = socketio(8066,{
+        this.io = socketio(8067,{
             path: "/bdp",
             cors:{
                 origin:'*',

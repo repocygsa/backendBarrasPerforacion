@@ -19,7 +19,7 @@ new socket()
 // Llamado Epp
 const epp = require('./src/proyectos/bdp/bdp')
 
-const port = 8065;
+const port = 8066;
 app.listen(port, () => {
   console.log(`Servidor corriendo en puerto: ${port}`);
 });
