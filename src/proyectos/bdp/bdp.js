@@ -134,7 +134,6 @@ const traeUltimoID = (ctto, callback) => {
   const condicion = ctto?`AND fk_ctto = '${ctto}'`:''
  
   const sql = `SELECT COUNT(id) AS ultimo_id FROM bdp_registro where id > 0 ${condicion}` ;
-console.log(sql)
   conector.query(
     sql,
     (err, result) => {
@@ -157,7 +156,6 @@ router.post("/guardarBdp", async (req, res) => {
 
   
     const cod_iden = `GOM-${req.body.datos.ctt_inf}-BP-${id}`;
-    console.log(cod_iden)
     const fecha = moment().format('YYYY-MM-DD HH:mm');
 
     const sql = "INSERT INTO bdp_registro SET ?";
@@ -196,7 +194,7 @@ router.post("/getBDP", (req, res) => {
 	gobm.bdp_registro.bdp_marca,
 	gobm.bdp_registro.bdp_fecha_hora,
 	gobm.bdp_registro.bdp_cod_identificador,
-	tofitobd.dotacioncc.Nombre,
+	tofitobd.DotacionCC.Nombre,
 	gobm.bdp_registro.fk_causa,
 	gobm.bdp_registro.fk_rut_responsable,
 	gobm.bdp_registro.bdp_obs,
@@ -206,9 +204,9 @@ router.post("/getBDP", (req, res) => {
 FROM
 	gobm.tbl_empre
 	INNER JOIN gobm.bdp_registro ON gobm.bdp_registro.fk_empresa = gobm.tbl_empre.rut_empre
-	INNER JOIN tofitobd.dotacioncc ON gobm.bdp_registro.bdp_user = tofitobd.dotacioncc.Rut
+	INNER JOIN tofitobd.DotacionCC ON gobm.bdp_registro.bdp_user = tofitobd.DotacionCC.Rut
 	LEFT JOIN gobm.bdp_causal_retiro ON gobm.bdp_registro.fk_causa = gobm.bdp_causal_retiro.id
-	LEFT JOIN tofitobd.dotacioncc AS dot_resp ON gobm.bdp_registro.fk_rut_responsable = dot_resp.Rut
+	LEFT JOIN tofitobd.DotacionCC AS dot_resp ON gobm.bdp_registro.fk_rut_responsable = dot_resp.Rut
   `;
   conector.query(sql, (err, result) => {
     if (err) throw err;
@@ -233,7 +231,6 @@ router.post("/getCausal", (req, res) => {
 });
 
 router.post("/updBarra", (req, res) => {
-console.log(req.body)
 
 const causa= req.body.data.bpd_causa
 const rut= req.body.data.rut_usu
