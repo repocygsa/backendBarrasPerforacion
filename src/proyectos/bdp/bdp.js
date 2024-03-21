@@ -183,6 +183,22 @@ router.post("/guardarBdp", async (req, res) => {
 
 router.post("/getBDP", (req, res) => {
 
+
+const empre=req.body.data.emp_inf?req.body.data.emp_inf:'0'
+const ctt=req.body.data.ctt_inf?req.body.data.ctt_inf:'Todo'
+const asig=req.body.data.asignacionResponsable?req.body.data.asignacionResponsable:0
+
+
+  const emp = empre !== '0'? `AND gobm.bdp_registro.fk_empresa = '${req.body.data.emp_inf}' ` :'';
+  const ctto = ctt !=='Todo'? `AND gobm.bdp_registro.fk_ctto = '${req.body.data.ctt_inf}'` :'';
+  
+
+  const est = asig === 0? '' : 
+  req.body.data.asignacionResponsable === 1 ? `AND gobm.bdp_registro.fk_causa > 0` : 
+  `AND gobm.bdp_registro.fk_causa IS NULL`;
+
+
+
   const sql = `
   SELECT
 	gobm.bdp_registro.id,
@@ -207,6 +223,11 @@ FROM
 	INNER JOIN tofitobd.DotacionCC ON gobm.bdp_registro.bdp_user = tofitobd.DotacionCC.Rut
 	LEFT JOIN gobm.bdp_causal_retiro ON gobm.bdp_registro.fk_causa = gobm.bdp_causal_retiro.id
 	LEFT JOIN tofitobd.DotacionCC AS dot_resp ON gobm.bdp_registro.fk_rut_responsable = dot_resp.Rut
+WHERE gobm.bdp_registro.id > 0
+${emp}
+${ctto}
+${est}
+
   `;
   conector.query(sql, (err, result) => {
     if (err) throw err;
@@ -260,7 +281,7 @@ router.post("/getCtaCascos", (req, res) => {
   tofitobd.DotacionCC.RutEmpresa 
 FROM
   tofitobd.DotacionCC
-
+WHERE Gerencia ='GOBM'
   `;
   conector.query(sql, (err, result) => {
     if (err) throw err;
